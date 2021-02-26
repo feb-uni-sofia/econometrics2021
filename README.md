@@ -11,6 +11,8 @@ The online meetings take place as follows:
 1. Tu. 10:00-10:30 (en)
 1. Tu. 18:00-18:30 (bg)
 
+using [Skype](https://join.skype.com/e06WWjwOrFbq).
+
 All classes will follow the same material, so you can choose any one of these dates.
 
 ## Homeworks
@@ -25,6 +27,10 @@ TBA
 ## Class notes
 
 [2020 script](https://feb-uni-sofia.github.io/econometrics-script/index.html)
+
+## Github account
+
+You will need a valid github.com account, so please [create one](https://github.com/join).
 
 ## Software and cloud tools
 
