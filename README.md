@@ -2,9 +2,16 @@
 
 This is the central repository for all exercise class materials.
 
-## Assignments
+The online meetings take place as follows:
 
-TBA
+1. Mo. 11:00-12:30 (en)
+1. Mo. 13:00-14:30 (de)
+1. Mo. 15:00-16:30 (en)
+1. Mo. 18:00-18:30 (en)
+1. Tu. 10:00-10:30 (en)
+1. Tu. 18:00-18:30 (bg)
+
+All classes will follow the same material, so you can choose any one of these dates.
 
 ## Homeworks
 
@@ -14,11 +21,12 @@ TBA
 
 TBA
 
+
 ## Class notes
 
 [2020 script](https://feb-uni-sofia.github.io/econometrics-script/index.html)
 
-## Software
+## Software and cloud tools
 
 For the exercise classes you will need a working installation of both R
 and R studio. Please download the R installation wizard (choose the version for your operating system),
