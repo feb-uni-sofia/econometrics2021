@@ -32,7 +32,7 @@ TBA
 
 You will need a valid github.com account, so please [create one](https://github.com/join).
 
-## Software and cloud tools
+## Software
 
 For the exercise classes you will need a working installation of both R
 and R studio. Please download the R installation wizard (choose the version for your operating system),
