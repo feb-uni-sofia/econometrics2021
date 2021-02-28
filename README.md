@@ -7,9 +7,9 @@ The online meetings take place as follows:
 1. Mo. 11:00-12:30 (en)
 1. Mo. 13:00-14:30 (de)
 1. Mo. 15:00-16:30 (en)
-1. Mo. 18:00-18:30 (en)
-1. Tu. 10:00-10:30 (en)
-1. Tu. 18:00-18:30 (bg)
+1. Mo. 18:00-19:30 (en)
+1. Tu. 10:00-11:30 (en)
+1. Tu. 18:00-19:30 (bg)
 
 using [Skype](https://join.skype.com/e06WWjwOrFbq).
 
