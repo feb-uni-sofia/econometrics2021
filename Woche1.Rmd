@@ -1,0 +1,56 @@
+---
+title: "Woche1"
+author: "Boyko Amarov"
+date: "3/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Einführung in R
+
+Erste einfache arithmetische Operationen, Variablenzuweisung und Datentypen (Numerisch, Character, Logisch).
+
+```{r}
+# Steurung halte, Enter drucken: führt die Zeile aus (Ctrl - Enter)
+2 + 5
+2 / 5
+2 * 5
+
+## Zuweisung (assignment)
+
+## Numerische werte
+x <- 2
+x
+
+x + 4
+
+## Zeichen werte (character)
+
+y <- "irgend ein Text"
+
+z <- x
+
+## Fehler (object not found)
+## z <- G
+
+## Zeilen, die mit # anfangen werden nich ausgeführt.
+## Alt und -
+
+
+## Logische Werte: TRUE/FALSE
+
+F <- "fsdfdsf"
+
+F
+
+z1 <- F ## Kein Felher, weil F schon definiert is: FALSE
+## F bitte nicht benutzen!
+
+z1 <- FALSE ## Besser!
+z2 <- TRUE
+```
+
+
