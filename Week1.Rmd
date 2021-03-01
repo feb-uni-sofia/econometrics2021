@@ -14,7 +14,32 @@ knitr::opts_chunk$set(echo = TRUE)
 Our first experience with R markdown. We use code `chunks` to run `R` code.
 
 ```{r}
-#install.packages("tidyverse")
+## Load packages
+## install.packages("tidyverse")
 library(tidyverse)
 ```
 
+```{r}
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+```
+
+What is in the data frame (table)?
+
+```{r}
+glimpse(earnings)
+```
+The data frame contains 15 variables (columns) and 1816 observations (rows). The observations here are persons.
+
+```{r}
+1 / 3
+NA ## Missing data value
+```
+
+## Descriptive summaries
+
+### Height
+
+```{r}
+mean(earnings$height)
+```
+Average height of the persons in the survey was 66.56 inches.
