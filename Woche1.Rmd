@@ -53,4 +53,20 @@ z1 <- FALSE ## Besser!
 z2 <- TRUE
 ```
 
+```{r}
+## Load packages
+## install.packages("tidyverse") ## Nur einmal laufen lassen
+library(tidyverse)
+```
+
+```{r}
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+```
+
+```{r}
+glimpse(earnings)
+```
+
+Es gibt 1816 Zeilen (row, observation, Beobachtung)
+
 
