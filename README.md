@@ -15,9 +15,9 @@ using [Skype](https://join.skype.com/e06WWjwOrFbq).
 
 All classes will follow the same material, so you can choose any one of these dates.
 
-## Homeworks
+## Homeworks 
 
-TBA
+Homework 1: [https://classroom.github.com/g/AgP6lrPG](https://classroom.github.com/g/AgP6lrPG)
 
 ## Grading
 

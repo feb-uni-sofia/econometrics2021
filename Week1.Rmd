@@ -1,0 +1,20 @@
+---
+title: "Week1.Rmd"
+author: "Boyko Amarov"
+date: "3/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Our first experience with R markdown. We use code `chunks` to run `R` code.
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
