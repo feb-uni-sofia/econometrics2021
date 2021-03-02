@@ -63,3 +63,24 @@ output: html_document
 # 
 # # a <- g
 ```
+
+```{r}
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+```
+
+```{r}
+## Инсталиране на пакет, инсталира се само веднъж за един компютър.
+## install.packages("tidyverse")
+```
+
+```{r}
+## Зареждане на пакет
+library(tidyverse)
+```
+
+Obs (observations): редове в таблица, variables: колонки в таблица.
+
+```{r}
+glimpse(earnings)
+```
+
