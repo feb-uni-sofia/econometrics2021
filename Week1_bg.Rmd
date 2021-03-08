@@ -17,52 +17,56 @@ output: html_document
 2 ^ 23
 
 56 - 38
-# 
-# ## Числени стойности
-# 
-# ## Записваме стойността 43 под името x. Създаваме променлива x със стойност 41
-# ## <- assignment operator
-# x < - 43
-# x <- 43
-# 
-# ## Shortcut: Alt -
-# 
-# ## След като сме записали стойност в паметта можем да я извикаме по име
-# x / 2
-# x
-# 
-# ## Текст (character values)
-# y <- "добър вечер"
-# 
-# 
-# ## Логически стойности (logical values, i.e. boolean)
-# z1 <- TRUE
-# z2 <- FALSE
+ 
+## Числени стойности
+ 
+## Записваме стойността 43 под името x. Създаваме променлива x със стойност 41
+## <- assignment operator
+x <- 43
 
-# z_1_plus_2 <- z1 + z2
-# z_1_plus_2
-# TRUE + FALSE
-# TRUE + TRUE
-# FALSE + FALSE
-# ## Има разлика между TRUE и "TRUE"
-# z3 <- "TRUE"
-# 
-# 
-# ## Логически стойности възникват най-често при логически сравнения, например
-# 
-# 3 > 5
-# 
-# 2 < 8
-# 
-# "Bob" == "Green"
-# "Bob" == "Bob"
-# 
-# ## Error: object 'G' not found
-# 
-# G <- 4
-# 
-# # a <- g
+## Внимавайте да няма празно място между < и -, 
+x < - 43
+ 
+## Shortcut: Alt -
+ 
+## След като сме записали стойност в паметта можем да я извикаме по име
+x / 2
+x
+ 
+## Текст (character values)
+y <- "добър вечер"
+ 
+ 
+## Логически стойности (logical values, i.e. boolean)
+z1 <- TRUE
+z2 <- FALSE
+
+z_1_plus_2 <- z1 + z2
+z_1_plus_2
+TRUE + FALSE
+TRUE + TRUE
+FALSE + FALSE
+## Има разлика между TRUE и "TRUE"
+z3 <- "TRUE"
+ 
+ 
+## Логически стойности възникват най-често при логически сравнения, например
+
+3 > 5
+
+2 < 8
+
+"Bob" == "Green"
+"Bob" == "Bob"
+
+## Error: object 'G' not found
+ 
+G <- 4
+ 
+# a <- g
 ```
+
+## Импортиране на данни
 
 ```{r}
 earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
