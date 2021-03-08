@@ -1,0 +1,32 @@
+---
+title: 'Week2: basic data summaries'
+author: "Boyko Amarov"
+date: "3/8/2021"
+output: html_document
+---
+
+## Data import
+
+```{r, setup, message=FALSE}
+## Load packages
+library(tidyverse)
+## Read the data
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+```
+
+
+```{r}
+glimpse(earnings)
+```
+
+## Basic summaries
+
+## Measurement scales
+
+<!-- 1. **Nominal**:  -->
+<!-- 2. **Ordinal**:  -->
+<!-- 3. **Interval**: -->
+<!-- 4. **Ratio**: -->
+
+
+
