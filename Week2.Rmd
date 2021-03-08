@@ -24,17 +24,84 @@ Data description
 - _height_ (numeric): height in inches (1 inch = 2.54 cm)
 - _weight_ (numeric): weight in pounds (1 pound $\approx$ 0.45 kilograms)
 - _male_ (numeric): 1 if a person is male, 0 otherwise
+- _earn_ (numeric): annual income in USD
 - _earnk_ (numeric): annual income in 1000 USD
 - _ethnicity_ (character): ethnicity
+- _age_ (numeric): Age of the person in years
 
 ## Basic summaries
 
+```{r}
+mean(earnings$height)
+```
+The persons were 66.5 inches tall (on average).
+
+Before we continue, let us create a new column `height_cm` in the dataset `earnings`.
+
+```{r}
+# earnings <- mutate(earnings, height_cm = 2.54 * height)
+
+## Equivalently using pipe syntax
+earnings <- earnings %>%
+  mutate(
+    height_cm = 2.54 * height
+  )
+```
+
+```{r}
+mean(earnings$height_cm)
+```
+```{r}
+summary(earnings$height_cm)
+```
+Tallest person was 208.3 cm tall (Max).  The shortest person was 144.8 cm tall (Min).
+About half of the persons were shorter than 167.6 cm (Median/2nd quartile/0.5 quantile). About half are taller than 167.6 cm (Median).
+
+1st quartile 162.6 cm: About one quarter (25%) of the persons were shorter than 162.6 cm (about 75% were taller).
+
+
+### Box-Whiskers Plot
+
+```{r}
+ggplot(data = earnings, aes(x = height_cm, y = ethnicity)) + geom_boxplot()
+```
+
+1. Location (median)
+2. Spread (diversity/heterogeneity/variability)
+
+```{r}
+## Example with identical values: min = max
+summary(c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+```
+
+For _categorical_ variables we use frequncy tables as a summary.
+
+```{r}
+table(earnings$ethnicity)
+```
+```{r}
+ggplot(data = earnings, aes(x = ethnicity)) + geom_bar()
+```
+
+There are 180 black persons in the dataset.
+
 ## Measurement scales
 
-<!-- 1. **Nominal**:  -->
-<!-- 2. **Ordinal**:  -->
+```{r}
+earnings <- earnings %>%
+  mutate(
+    sex = ifelse(male == 1, "Male", "Female")
+  )
+```
+
+Categorical scales:
+
+1. **Nominal**: Values of the variable have no numeric meaning. Values are only labels indicating group membership.
+2. **Ordinal**: Values of the variable are just labels (as is the case with the nominal scale), but the labels are ordered.
+ school grades
+ "2" "3" "4" "5" "6"
+
+Numeric scales
 <!-- 3. **Interval**: -->
-<!-- 4. **Ratio**: -->
-
-
+4. **Ratio scale**: Numeric scale, ratios between values make sense.
 
