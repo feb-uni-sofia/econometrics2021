@@ -19,6 +19,14 @@ earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometri
 glimpse(earnings)
 ```
 
+Data description
+
+- _height_ (numeric): height in inches (1 inch = 2.54 cm)
+- _weight_ (numeric): weight in pounds (1 pound $\approx$ 0.45 kilograms)
+- _male_ (numeric): 1 if a person is male, 0 otherwise
+- _earnk_ (numeric): annual income in 1000 USD
+- _ethnicity_ (character): ethnicity
+
 ## Basic summaries
 
 ## Measurement scales
