@@ -7,6 +7,9 @@ output: html_document
 
 ## Data import
 
+` (back trick)
+
+
 ```{r, setup, message=FALSE}
 ## Load packages
 library(tidyverse)
@@ -21,21 +24,70 @@ glimpse(earnings)
 
 Data description
 
-- _height_ (numeric): height in inches (1 inch = 2.54 cm)
-- _weight_ (numeric): weight in pounds (1 pound $\approx$ 0.45 kilograms)
-- _male_ (numeric): 1 if a person is male, 0 otherwise
-- _earnk_ (numeric): annual income in 1000 USD
+- _height_ (numeric): Grösse (inches, 1 inch = 2.54 cm)
+- _weight_ (numeric): Gewicht (pounds, 1 pound $\approx$ 0.45 kilograms)
+- _male_ (numeric): 1: falls Mann, 0: Frau
+- _earn_ (numeric): Jahreseinkommen in USD
+- _earnk_ (numeric): Jahreseinkommen in 1000 USD
 - _ethnicity_ (character): ethnicity
 
-## Basic summaries
+## Einfache Zusammenfassungen 
+
+```{r}
+## Mittelwert
+mean(earnings$height)
+```
+
+Die mittlere Größe der Personen war 66.5 inch.
+
+```{r}
+summary(earnings$height)
+```
+Ungefähr die Hälfte der Personen hatte Größe, die kleiner war als 66 inch (Median, 2. Quartil, 0.5 Quantil). 
+
+1st Qu: erster Quartil (0.25 Quantil): Ungefähr ein Viertel der Pers. hatten Größe kleiner als 64 inch.
+
+1. Lage (Location) (Mittlere Gerade im Boxplot)
+2. Streuung (Spread)
+
+
+```{r}
+ggplot(data = earnings, aes(x = height, y  = factor(male))) + geom_boxplot()
+```
+```{r}
+ggplot(data = earnings, aes(x = height)) + geom_histogram()
+```
+
+```{r}
+## Häufigkeitstabelle
+table(earnings$ethnicity)
+```
+```{r}
+## Barchart
+ggplot(data = earnings, aes(x = ethnicity)) + geom_bar()
+```
 
 ## Measurement scales
+
+Nominal skalierte Variablen: die Meßwerte haben keine numerische Bedeuting (Werte sind einfach Etiketten), z.B. `ethnicity`, `male`.
+
+Ordinal skalierte Variablen: Etiketten wie die nominal skalierten Variablen, aber die Etiketten haben eine Ordnung, z.B. Schulnoten.
+
+
+Neue Variable `sex` im Datensatz `earnings` erstellen, die die Werte `Male` und `Female` enthält.
+
+```{r}
+earnings <- mutate(earnings, sex = ifelse(male == 1, "Male", "Female"))
+
+## Oder equivalent:
+earnings <- earnings %>%
+  mutate(
+    sex = ifelse(male == 1, "Male", "Female"),
+    height_cm = 2.54 * height
+  )
+```
 
 <!-- 1. **Nominal**:  -->
 <!-- 2. **Ordinal**:  -->
 <!-- 3. **Interval**: -->
 <!-- 4. **Ratio**: -->
-
-
-
-
