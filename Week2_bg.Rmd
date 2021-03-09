@@ -28,3 +28,85 @@ Data description
 - _earnk_ (numeric): annual income in 1000 USD
 - _ethnicity_ (character): ethnicity
 - _age_ (numeric): Age of the person in years
+
+
+## Height
+
+```{r}
+mean(earnings$height) * 2.54
+```
+Средният ръст на хората в изследването е 66.5 инча (169 см).
+
+Добавяме колонка `height_cm` в таблицата `earnings`.
+
+```{r}
+# earnings <- mutate(
+#   earnings,
+#   height_cm = 2.54 * height,
+# )
+
+## Еквивалентно на горния код
+earnings <- earnings %>%
+  mutate(
+    height_cm = 2.54 * height,
+  )
+```
+
+```{r}
+mean(earnings$height_cm)
+```
+
+```{r}
+summary(earnings$height_cm)
+```
+
+Най-ниският човек в изследването е бил висок 144.8 см (min). Най-високият човек е бил висок
+208.3 см (max). _Около_ половината от хората в извадката са с ръст по-нисък от 167.6. _Около_ една четвърт от хорта
+са били по-ниски от 162.5 см (1st quartile). 
+
+1st Qu (първи квартил)
+Median (втори квартил, 0.5 квантил)
+3th Qu (трети квартил)
+
+```{r}
+mean(earnings$height_cm <= 167.6)
+```
+
+```{r}
+ggplot(earnings, aes(x = height_cm, y = ethnicity)) + geom_boxplot()
+```
+
+1) Location (център на данните)
+2) Spread (variability/diversity)
+
+## 
+
+Categorical scales:
+
+Номинална скала: стойностите са само етикети,
+които показват принадлежност към някаква група (ethnicity, gender, etc..)
+
+Ординална скала: като номиналната скала, но с ред дефиниран между етикетите
+
+"2", "3", "4", "5", "6"
+
+```{r}
+earnings %>%
+  mutate(
+    sex = ifelse(male == 1, "Male", "Female")
+  ) %>%
+  select(male, sex)
+```
+
+```{r}
+mean(earnings$male)
+```
+```{r}
+## Frequency table
+table(earnings$ethnicity)
+```
+
+Bar charts
+```{r}
+ggplot(earnings, aes(x = ethnicity)) + geom_bar()
+```
