@@ -103,6 +103,6 @@ Numeric scales
 <!-- 3. **Interval**: -->
 4. **Ratio scale**: Numeric scale, ratios between values make sense.
 
-## References
+## Further reading
 
 [R for data science](https://r4ds.had.co.nz/index.html)
