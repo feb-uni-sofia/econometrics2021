@@ -29,19 +29,13 @@ Data description
 - _ethnicity_ (character): ethnicity
 - _age_ (numeric): Age of the person in years
 
-## Basic summaries
+Create a new column holding the height in cm. We use the `mutate` function for this task.
 
 ```{r}
-mean(earnings$height)
-```
-The persons were 66.5 inches tall (on average).
+##
+## earnings <- mutate(earnings, height_cm = 2.54 * height)
 
-Before we continue, let us create a new column `height_cm` in the dataset `earnings`.
-
-```{r}
-# earnings <- mutate(earnings, height_cm = 2.54 * height)
-
-## Equivalently using pipe syntax
+## Equivalently using pipes:
 earnings <- earnings %>%
   mutate(
     height_cm = 2.54 * height
@@ -51,34 +45,38 @@ earnings <- earnings %>%
 ```{r}
 mean(earnings$height_cm)
 ```
+The average height of the persons was 169 cm.
+
 ```{r}
 summary(earnings$height_cm)
 ```
-Tallest person was 208.3 cm tall (Max).  The shortest person was 144.8 cm tall (Min).
-About half of the persons were shorter than 167.6 cm (Median/2nd quartile/0.5 quantile). About half are taller than 167.6 cm (Median).
+```{r}
+mean(earnings$height_cm < 162.6)
+```
+The tallest person was 208 cm tall. The shortest person was 144.8 cm. Median equals 167.6 cm meaning that: _about_ half of the persons
+in the survey were shorter than 167.6 cm (median/2nd quartile/0.5 quantile/50% percentile). 1st quartile equals 162.6: _roughly_ (because of rounding in height value) one quarter (25%) were shorter than 162.6 cm. 3th quartile equals 175.9 cm: _about_ 75% (three quarters) of the persons were shorter than 175.9 cm.
 
-1st quartile 162.6 cm: About one quarter (25%) of the persons were shorter than 162.6 cm (about 75% were taller).
-
-
-### Box-Whiskers Plot
+## Box-Whiskers plot
 
 ```{r}
 ggplot(data = earnings, aes(x = height_cm, y = ethnicity)) + geom_boxplot()
 ```
-
-1. Location (median)
-2. Spread (diversity/heterogeneity/variability)
-
 ```{r}
-## Example with identical values: min = max
-summary(c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+## Extreme case of no variation in the data (all values equal)
+summary(c(2, 2, 2, 2, 2, 2, 2))
+ggplot(data = data.frame(x = c(2, 2, 2, 2, 2, 2, 2)), aes(x = x)) + geom_boxplot()
 ```
 
-For _categorical_ variables we use frequncy tables as a summary.
+1. Location: (measured by the median)
+2. Spread: (distance between min/max and between the 1st and the 3the quartiles)
+3. Outliers: observations that are different from the rest of the observations (persons)
+
+For _categorical_ variables we use frequency tables as a summary.
 
 ```{r}
 table(earnings$ethnicity)
 ```
+
 ```{r}
 ggplot(data = earnings, aes(x = ethnicity)) + geom_bar()
 ```
@@ -104,4 +102,3 @@ Categorical scales:
 Numeric scales
 <!-- 3. **Interval**: -->
 4. **Ratio scale**: Numeric scale, ratios between values make sense.
-
