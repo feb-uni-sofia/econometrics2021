@@ -88,6 +88,7 @@ ggplot(df_unif, aes(x = x)) +
 ## the simulation is reproducible
 # set.seed(2)
 
+
 N_pers <- 100
 N_steps <- 32
 
