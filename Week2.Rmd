@@ -112,32 +112,45 @@ Numeric scales
 
 Scatter plot
 
-
 ```{r}
-## aes: aesthetics
+## Compute the mean by simply omitting the missing values
+mean(earnings$weight_kg, na.rm = TRUE)
 
-## na.rm means to remove any missing values
-mean_weight <- mean(earnings$weight_kg, na.rm = TRUE)
-mean_height <- mean(earnings$height_cm)
+mean(earnings$height_cm)
 
 ## NA: missing/undefined value
-
-ggplot(data = earnings, mapping = aes(x = weight_kg, y = height_cm)) +
-  geom_point(position = "jitter", alpha = 0.3) +
-  geom_hline(yintercept = 169) + ## average height
-  geom_vline(xintercept = 70) + 
-  geom_smooth(method = "lm")
+```
+```{r}
+NA + 2
 ```
 
 
+```{r}
+ggplot(
+  data = earnings, 
+  ## aes: aesthetics
+  mapping = aes(x = weight_kg, y = height_cm)
+  ) +
+  geom_point(position = "jitter", alpha = 0.3) +
+  geom_hline(yintercept = 169) + 
+  geom_vline(xintercept = 70)
+```
+
 Scatter plot with no association between the variables
+
+```{r}
+## r: random, unif: uniform
+# ?runif
+runif(100, min = -1, max = 1)
+```
+
 ```{r}
 ## 
 df_noassoc <- data.frame(
   ## Select 100 values at random from [-1,k 1]
   ## random numbers from the uniform distribution
   x = runif(100, min = -1, max = 1),
-  y = runif(100,min = -1, max = 1)
+  y = runif(100, min = -1, max = 1)
 )
 
 ggplot(data = df_noassoc, aes(x = x, y = y)) + 

@@ -1,0 +1,221 @@
+---
+title: "Week 3"
+author: "Boyko Amarov"
+date: "3/13/2021"
+output: html_document
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+
+## Install the tidymodels package (again, as with any other package you need to install in only once)
+## install.packages("tidymodels")
+library(tidymodels)
+```
+
+```{r}
+## Load the data
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+```
+
+
+# Sampling
+
+Sample: a subset of a population.
+
+```{r}
+population <- earnings %>%
+  mutate(
+    ## n(): returns the number of rows
+    person_id = 1:n()
+  ) %>%
+  select(person_id, height_cm)
+
+sample1 <- population %>%
+  slice_sample(n = 200)
+
+mean(sample1$height_cm)
+```
+
+
+## Uniform distribution
+
+
+```{r}
+x <- runif(4, min = -1, max = 1)
+x ## Result of every single game
+cumsum(x) ## Running total, cumulative sum
+
+```
+
+
+Select values at random in some interval [a, b].
+
+```{r}
+N_draws <- 2
+## 1e5 = 100,000
+
+df_unif <- data.frame(
+  ## Select values at random between -1 and 1
+  
+  x = runif(N_draws, min = -1, max = 1)
+) %>%
+  mutate(
+    x_sum = cumsum(x)
+  )
+
+ggplot(df_unif, aes(x = x)) +
+  geom_histogram(
+    ## Draw the relative frequency instead of counts
+    # aes(y = ..density..),
+    breaks = seq(-1, 1, length.out = 4),
+    alpha = 0.5,
+  ) +
+  geom_line(
+    data = data.frame(x_grid = seq(-1.2, 1.2, by = 0.01)) %>% mutate(dens = dunif(x_grid, min = -1, max = 1)),
+    aes(x = x_grid, y = dens)) +
+    labs(
+      title = "Histogram"
+    )
+```
+## Sampling from standard distribution
+
+
+```{r, echo=FALSE}
+## Code for illustration only
+
+## Set a seed for the random number generation so that
+## the simulation is reproducible
+# set.seed(2)
+
+N_pers <- 100
+N_steps <- 32
+
+positions_game <- expand_grid(
+    person = 1:N_pers,
+    step = 1:N_steps
+  ) %>%
+  mutate(
+    coin_toss_result = sample(c(-1, 1), size = N_pers * N_steps, replace = TRUE),
+    cont_coin_toss_result = runif(N_pers * N_steps, min = -1, max = 1),
+  ) %>%
+  group_by(person) %>%
+  mutate(
+    position = cumsum(coin_toss_result),
+    position_cont = cumsum(cont_coin_toss_result),
+  ) %>%
+  ungroup() %>%
+  bind_rows(tibble(
+    person = 1:N_pers, 
+    step = 0, 
+    coin_toss_result = 0, 
+    position = 0,
+    position_cont = 0
+  )) %>%
+  arrange(person, step)
+
+positions_game %>%
+  ggplot(aes(x = step, y = position_cont, group = person)) +
+      coord_cartesian(ylim = c(-10, 10)) +
+      scale_x_continuous("Step", breaks = c(0, 4, 8, 16, 32)) +
+      geom_line(
+        alpha = 0.7, 
+        color = "steelblue2",
+        size = 1 / 3) +
+      geom_hline(yintercept = 0) +
+      geom_line(
+        data = positions_game %>% filter(person == 1),
+        alpha = 1, 
+        color = "firebrick2") +
+      geom_vline(
+        xintercept = c(4, 8, 16, 32),
+        linetype = 2, size = 1 / 6)
+```
+
+```{r, echo=FALSE}
+## Code for illustration only
+
+selected_steps <- positions_game %>%
+  filter(step %in% c(4, 8, 16, 32)) %>%
+  group_by(step) %>%
+  mutate(
+    step_mean = mean(position_cont),
+    step_sd = sd(position_cont)
+  )
+
+step_sd <- selected_steps %>%
+  group_by(step) %>%
+  summarise(
+    mean = mean(position_cont),
+    sd = sd(position_cont)
+  ) %>%
+  mutate(
+    x_grid = list(seq(-7, 7, length.out = 80))
+  ) %>%
+  unnest(x_grid) %>%
+  mutate(
+    norm_dens = dnorm(x_grid, mean = mean, sd = sd)
+  )
+
+selected_steps %>%
+  ggplot(aes(x = position_cont)) +
+    geom_histogram(
+      aes(y = ..density..),
+      bins=40, alpha = 0.4) +
+    geom_line(
+      data = step_sd, aes(x = x_grid, y = norm_dens),
+      color="firebrick4"
+    ) +
+    facet_wrap(~step)
+```
+
+![Galton box](https://upload.wikimedia.org/wikipedia/commons/c/c1/Galton_box.jpg)
+
+[https://upload.wikimedia.org/wikipedia/commons/d/dc/Galton_box.webm](Video)
+
+```{r, echo = FALSE}
+dt <- data.frame(
+  ## Creates a sequence of 100 numbers between -3 and 3
+  x = seq(-3, 3, length.out = 100)
+) %>%
+  mutate(
+    ## Computes the standard normal density at each of the 100 points in x
+    norm_dens = dnorm(x)
+  )
+
+
+dt %>%
+  ggplot(aes(x = x, y = norm_dens)) +
+  ## Draws the normal density line
+  geom_line() + 
+  ## Draws the shaded area under the curve between 
+  ## -1 and 1
+  geom_ribbon(
+    data = filter(dt, x < 1, x > -1), 
+    aes(ymin = 0, ymax = norm_dens),
+    ## Controls the transparency of the area
+    alpha = 0.5
+  ) + 
+  annotate(
+    "text",
+    x = 0,
+    y = dnorm(0) / 2,
+    label = paste("Pr(-1 < X < 1) = ", round(pnorm(1) - pnorm(-1), 2), sep = " ")
+  )
+  # geom_area(
+  #   aes(x = ifelse(x > -1.2 & x < 1.1 , x, 0)),
+  #   fill = "red", alpha = 0.5)
+  # +
+  # geom_segment(
+  #   aes(x = -2, xend = 2, y = dnorm(-2), ymax = dnorm(2))
+  # )
+  # +
+  # annotate(geom = "text",
+  #          x = 0.62, y = 0.001,
+  #          label = "middle 80%") +
+  # labs(x = "proportion of water (p)",
+  #      y = "density")
+```
+
+
+

@@ -71,7 +71,9 @@ ggplot(data = earnings, aes(x = ethnicity)) + geom_bar()
 
 Nominal skalierte Variablen: die Meßwerte haben keine numerische Bedeuting (Werte sind einfach Etiketten), z.B. `ethnicity`, `male`.
 
-Ordinal skalierte Variablen: Etiketten wie die nominal skalierten Variablen, aber die Etiketten haben eine Ordnung, z.B. Schulnoten.
+Ordinal skalierte Variablen: Etiketten wie die nominal skalierten Variablen, aber die Etiketten haben eine Ordnung
+
+z.B. Schulnoten. "2", "3", "4", "5", "6"
 
 
 Neue Variable `sex` im Datensatz `earnings` erstellen, die die Werte `Male` und `Female` enthält.
@@ -83,7 +85,8 @@ earnings <- mutate(earnings, sex = ifelse(male == 1, "Male", "Female"))
 earnings <- earnings %>%
   mutate(
     sex = ifelse(male == 1, "Male", "Female"),
-    height_cm = 2.54 * height
+    height_cm = 2.54 * height,
+    weight_kg = 0.45 * weight
   )
 ```
 
@@ -91,3 +94,48 @@ earnings <- earnings %>%
 <!-- 2. **Ordinal**:  -->
 <!-- 3. **Interval**: -->
 <!-- 4. **Ratio**: -->
+
+## Zusammenhang
+
+
+Streudiagramm
+
+```{r}
+## NA: fehlender Wert
+
+## na.rm = TRUE: fehlende Werte auslassen
+mean(earnings$weight_kg, na.rm = TRUE)
+mean(earnings$height_cm)
+```
+
+
+```{r}
+ggplot(
+  data = earnings, 
+  aes(x = weight_kg, y = height_cm)
+  ) +
+  geom_point(position = "jitter", alpha = 0.3) +
+  geom_vline(xintercept = 70) +
+  geom_hline(yintercept = 169)
+  
+```
+
+```{r}
+df_unabh <- data.frame(
+  x = runif(100, min = -1, max = 1),
+  y = runif(100, min = -1, max = 1)
+)
+```
+
+
+
+```{r}
+ggplot(data = df_unabh, aes(x = x, y = y)) + 
+  geom_point() +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0)
+```
+
+## Stichprobe
+
+
