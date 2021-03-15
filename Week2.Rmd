@@ -34,11 +34,11 @@ Create a new column holding the height in cm. We use the `mutate` function for t
 ```{r}
 ##
 ## earnings <- mutate(earnings, height_cm = 2.54 * height)
-
 ## Equivalently using pipes:
 earnings <- earnings %>%
   mutate(
-    height_cm = 2.54 * height
+    height_cm = 2.54 * height,
+    weight_kg = 0.45 * weight
   )
 ```
 
@@ -61,6 +61,10 @@ in the survey were shorter than 167.6 cm (median/2nd quartile/0.5 quantile/50% p
 ```{r}
 ggplot(data = earnings, aes(x = height_cm, y = ethnicity)) + geom_boxplot()
 ```
+```{r}
+ggplot(data = earnings, aes(x = height_cm, y = factor(male))) + geom_boxplot()
+```
+
 ```{r}
 ## Extreme case of no variation in the data (all values equal)
 summary(c(2, 2, 2, 2, 2, 2, 2))
@@ -102,6 +106,45 @@ Categorical scales:
 Numeric scales
 <!-- 3. **Interval**: -->
 4. **Ratio scale**: Numeric scale, ratios between values make sense.
+
+
+## Association
+
+Scatter plot
+
+
+```{r}
+## aes: aesthetics
+
+## na.rm means to remove any missing values
+mean_weight <- mean(earnings$weight_kg, na.rm = TRUE)
+mean_height <- mean(earnings$height_cm)
+
+## NA: missing/undefined value
+
+ggplot(data = earnings, mapping = aes(x = weight_kg, y = height_cm)) +
+  geom_point(position = "jitter", alpha = 0.3) +
+  geom_hline(yintercept = 169) + ## average height
+  geom_vline(xintercept = 70) + 
+  geom_smooth(method = "lm")
+```
+
+
+Scatter plot with no association between the variables
+```{r}
+## 
+df_noassoc <- data.frame(
+  ## Select 100 values at random from [-1,k 1]
+  ## random numbers from the uniform distribution
+  x = runif(100, min = -1, max = 1),
+  y = runif(100,min = -1, max = 1)
+)
+
+ggplot(data = df_noassoc, aes(x = x, y = y)) + 
+  geom_point() +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0)
+```
 
 ## Further reading
 
