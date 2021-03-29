@@ -22,7 +22,7 @@ earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometri
 glimpse(earnings)
 ```
 
-Data description
+Datenbeschreibung
 
 - _height_ (numeric): Grösse (inches, 1 inch = 2.54 cm)
 - _weight_ (numeric): Gewicht (pounds, 1 pound $\approx$ 0.45 kilograms)
@@ -107,18 +107,99 @@ Streudiagramm
 mean(earnings$weight_kg, na.rm = TRUE)
 mean(earnings$height_cm)
 ```
+```{r}
+ggplot(
+  ## Wо sollen die Daten herkommen?
+  data = earnings,
+  ## aes: aesthetics
+  mapping = aes(
+    x = weight_kg, 
+    y = height_cm
+    )
+  ) + 
+  ## Punkte hinzufügen
+  geom_point(
+    ## Transparenz
+    alpha = 0.2,
+    ## Um die Überlagerung von Punkten (gleiches Gewicht, gleiche Größe) aufzulösen
+    position = "jitter"
+  ) + 
+  ## Horizontale Gerade bei der mittleren Größe
+  geom_hline(yintercept = 169, color = "steelblue2") + 
+  ## Vertikale Gerade beim mittleren Gewicht
+  geom_vline(xintercept = 70, color = "firebrick4") +
+  ## Beschriftungen hinzufügen
+  labs(
+    x = "Gewicht (kg)",
+    y = "Größe (cm)",
+    title = "Scatterplot weight and height"
+  )
+```
+Personen mit höherem Gewicht haben (als Tendez) höhere Größe.
+
+$$
+(x_i - \bar{x})(y_i - \bar{y}) \geq 0  \text{ für Personen oben rechts (hoch-hoch)}\\
+(x_i - \bar{x})(y_i - \bar{y}) \geq 0  \text{ für Personen unten links (niedrig-niedrig)}\\
+(x_i - \bar{x})(y_i - \bar{y}) \leq 0  \text{ für Personen oben links (niedrig-hoch)}\\
+(x_i - \bar{x})(y_i - \bar{y}) \leq 0  \text{ für Personen unten rechts (hoch-niedrig)}\\
+\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}) = \\ \sum_{i \in \text{niedrig-niedrig}}(x_i - \bar{x})(y_i - \bar{y}) + 
+\sum_{i \in \text{hoch-hoch}}(x_i - \bar{x})(y_i - \bar{y}) + \\ \sum_{i \in \text{niedrig-hoch}}(x_i - \bar{x})(y_i - \bar{y}) + 
+\sum_{i \in \text{hoch-niedrig}}(x_i - \bar{x})(y_i - \bar{y})
+$$
+## Kovarianz zwischen x und y
+
+$$
+Cov(x, y) = \frac{1}{n - 1}\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}) 
+$$
+```{r}
+## complete.obs: nur Beobachtungen ohne fehlende Werte benutzen
+cov(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
+```
+```{r}
+## complete.obs: nur Beobachtungen ohne fehlende Werte benutzen
+cov(earnings$height, earnings$weight, use = "complete.obs")
+```
+
+$$
+\text{Fläche}:\\
+2[m] \times 5[m] = 10[m \times m = m^2]
+$$
+
+$$
+(x_i - \bar{x})[kg]\\
+(y_i - \bar{y})[cm]\\
+(x_i - \bar{x})[kg](y_i - \bar{y})[cm] = [kg \times cm]\\
+(x_i - \bar{x})[pound](y_i - \bar{y})[inch] = [pounds \times inch]\\
+\frac{Cov(x, y)[kg\times cm]}{??[kg]??[cm]}
+$$
+$$
+(x_i - \bar{x})^2[kg???]\\
+(x_i - \bar{x})[kg](x_i - \bar{x})[kg] = [kg^2]
+$$
+
+$$
+Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x})\\
+S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2 \text{ Stichprobenvarianz von x}\\
+S(x) = \sqrt{S^2(x)} \text{ (Stichproben-)Standardabweichung von x}\\ 
+$$
+
+
+$$
+\rho(x, y) = \frac{Cov(x, y)}{S(x)S(y)} \text{ Korrelation}\\
+- 1 \leq \rho(x, y) \leq 1
+$$
+```{r}
+## Korrelation berechnen
+cor(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
+cor(earnings$height, earnings$weight, use = "complete.obs")
+```
 
 
 ```{r}
-ggplot(
-  data = earnings, 
-  aes(x = weight_kg, y = height_cm)
-  ) +
-  geom_point(position = "jitter", alpha = 0.3) +
-  geom_vline(xintercept = 70) +
-  geom_hline(yintercept = 169)
-  
+## r: random (zufällig), unif (uniform) gleichmäßig (Gleichverteilung)
+runif(100, min = -1, max = 1)
 ```
+
 
 ```{r}
 df_unabh <- data.frame(
@@ -134,8 +215,54 @@ ggplot(data = df_unabh, aes(x = x, y = y)) +
   geom_point() +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0)
+
+cor(df_unabh$x, df_unabh$y)
 ```
 
-## Stichprobe
+```{r}
+x <- 1:10
+y <- 2 + 5 *x
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_vline(xintercept = mean(x)) + 
+  geom_hline(yintercept = mean(y)) + 
+  geom_abline(intercept = 2, slope = 5)
+
+cor(x, y)
+```
+```{r}
+x <- 1:10
+y <- 2 - 5 *x
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_vline(xintercept = mean(x)) + 
+  geom_hline(yintercept = mean(y)) + 
+  geom_abline(intercept = 2, slope = -5)
+
+cor(x, y)
+```
+
+```{r}
+## pi: 3.14
+x <- seq(0, pi, length.out = 50)
+y <- sin(x)
+df_nonlinear <- data.frame(x = x, y = y)
+
+
+ggplot(data = df_nonlinear, aes(x = x, y = y)) +
+  geom_point()
+
+cor(x, y)
+## 
+```
+
+$$
+\text{e: exponent}\\
+3.517357e-16 = \frac{3.517357}{10 ^ {16}}\\
+10^6 = 1,000,000\\
+10^9 = 1,000,000,000
+$$
 
 

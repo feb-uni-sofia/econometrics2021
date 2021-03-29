@@ -156,22 +156,38 @@ ggplot(
 ```
 From the points in the scatter-plot we see that heavier persons also tended to be taller persons.
 
+$$
+x_i: \text{ weight of person } i\\
+y_i: \text{ height of person } i\\
+(x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the upper right part of the plot: high-high}\\
+(x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the lower left of the plot: low-low}\\
+(x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left of the plot: low-high}\\
+(x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left of the plot: high-low}
+$$
+$$
+\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}) = \sum_{i \in \text{low-low}}(x_i - \bar{x})(y_i - \bar{y}) + 
+\sum_{i \in \text{high-high}}(x_i - \bar{x})(y_i - \bar{y}) + \sum_{i \in \text{low-high}}(x_i - \bar{x})(y_i - \bar{y}) + 
+\sum_{i \in \text{high-low}}(x_i - \bar{x})(y_i - \bar{y})
+$$
+
 ## Sample Covariance
 
 
 Some notation: 
 
 $$
+i = 1,\ldots,n = 1816 \text{ persons}\\
 \text{Avearge values}:\\
 \bar{x} = \frac{1}{n}\sum_{i = 1}^n x_i\\
 \bar{y} = \frac{1}{n}\sum_{i = 1}^n y_i
 $$
 
-Sum of the products over all observation (persons).
+Sum of the cross-products over all observation (persons).
 
 $$
 Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y}) \text{ the sign of this sum depends on the arrangement of the points}
 $$
+
 ```{r}
 ## Compute the covariance between height_cm and weight_cm
 ## Omit missing values for weight: use complete obs instructs it to use only 
@@ -184,25 +200,32 @@ cov(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
 cov(earnings$height, earnings$weight, use = "complete.obs")
 ```
 
-<!-- $$ -->
-<!-- x_i: \text{weight of person i}\\ -->
-<!-- y_i: \text{height of person i}\\ -->
-<!-- (x_i - \bar{x}) \geq 0 \text{ for persons in upper right quadrant (high-high) }\\ -->
-<!-- (y_i - \bar{y}) \geq 0 \text{ for persons in upper right quadrant (high-high) }\\ -->
-<!-- (x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in upper right quadrant (high-high) }\\ -->
-<!-- (x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the bottom left quadrant (low-low) }\\ -->
-<!-- (x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the bottom right quadrant (high-low) }\\ -->
-<!-- (x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left quadrant (low-high) }\\ -->
-<!-- $$ -->
 
+```{r}
+cov(earnings$height_cm, 1000 * earnings$weight_kg, use = "complete.obs")
+```
 
 $$
 Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})
 $$
 $$
+(x_i - \bar{x})[kg](y_i - \bar{y})[cm] = (x_i - \bar{x})(y_i - \bar{y})[kg \times cm]
+$$
+$$
+\text{Room area}:\\
+2[m] \times 5[m] = 10[m \times m = m^2]
+$$
+
+Unites of measurements of the covariance
+$$
+Cov(x, y)[kg\times cm] = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})
+$$
+
+$$
 Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x})\\
 S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2 \text{ sample variance of x}\\
 S(x) = \sqrt{S^2(x)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2} \text{ sample standard deviation of x}\\ 
+S(y) = \sqrt{S^2(y)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (y_i - \bar{y})^2} \text{ sample standard deviation of y}\\ 
 $$
 $$
 \rho(x, y) = \frac{Cov(x, y)}{S(x)S(y)} \text{ sample correlation between x and y}\\
@@ -211,51 +234,17 @@ $$
 
 ```{r}
 ## Compute the correlation between weight and height
-cor(earnings$height, earnings$weight, use = "complete.obs")
 cor(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
+cor(earnings$height, earnings$weight, use = "complete.obs")
 ```
-$$
-\text{Unit of measurement of the covariance?}\\
-(x_i[kg] - \bar{x}[kg]) \implies (x_i - \bar{x})[kg]\\
-(y_i[cm] - \bar{y}[cm]) \implies (y_i - \bar{y})[cm]\\
-(x_i - \bar{x})[kg](y_i - \bar{y})[cm] => (x_i - \bar{x})(y_i - \bar{y})[cm \times kg]\\
-Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})[cm \times kg]\\
-S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2[kg^2] \text{ sample variance of x (weight) measured in } kg^2\\
-S(x)[kg] = \sqrt{S^2(x)[kg^2]}\\
-S^2(y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (y_i - \bar{y})^2[cm^2] \text{ sample variance of y (height) measured in } cm^2\\
-S(y)[cm] = \sqrt{S^2(x)[cm^2]}\\
-\rho(x, y) = \frac{Cov(x, y)[kg\times cm]}{S(x)[kg]S(y)[cm]}[unitless]
-$$
 
 $$
-5[m] \times 4[m] = 20 [m^2]\\
-2[m] \times 5[m] = 10 [m^2] \\
-\frac{20 [m^2]}{10 [m^2]}[unitless] \text{ because the measurement units cancel}
-$$
-
-$$
-Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x}) =\\
-Cov(x, x) = Var(x) = S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2\\
-S(x) = \sqrt{S^2(x)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2}: \text{емп. стандартно отклонение, sample standard deviation}\\
-S(y) = \sqrt{S^2(y)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (y_i - \bar{y})^2}: \text{емп. стандартно отклонение, sample standard deviation}
-$$
-$$
-\rho(x, y) = \frac{Cov(x, y)}{S(x)S(y)}: \text{ корелация между x и y}\\
+\rho(x, y) = \frac{Cov(x, y)[kg \times cm]}{S(x)[kg]S(y)[cm]}: \text{ корелация между x и y}\\
 -1 \leq \rho \leq 1
 $$
-```{r}
-## Covariance (complete.obs: използвай наблюдения без липсващи стойности)
-cov(earnings$weight_kg, earnings$height_cm, use = "complete.obs")
-
-##
-cor(earnings$weight_kg, earnings$height_cm, use = "complete.obs")
-```
-
-Scatter plot with no association between the variables
 
 ```{r}
-## r: random, unif: uniform
-# ?runif
+## r: random (случайно), unif: uniform (равномерно)
 runif(100, min = -1, max = 1)
 ```
 
@@ -268,16 +257,18 @@ df_noassoc <- data.frame(
   y = runif(100, min = -1, max = 1)
 )
 
-ggplot(data = df_noassoc, aes(x = x, y = y)) + 
+ggplot(data = df_noassoc, aes(x = x, y = y)) +
   geom_point() +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0)
-```
-Expected correlation for the points in this plot?
 
-```{r}
+# Expected correlation for the points in this plot?
+# cov(df_noassoc$x, df_noassoc$y)
 cor(df_noassoc$x, df_noassoc$y)
+mean(df_noassoc$x)
+mean(df_noassoc$y)
 ```
+
 
 ## Zero correlation
 
@@ -285,8 +276,11 @@ Let's say you are given a correlation coefficient of 0 for weight and height.The
 measures _linear_ association.
 
 
+
+
 ```{r}
-x <- seq(0, 3 * pi, length.out = 50)
+## pi: 3.14
+x <- seq(0,  pi, length.out = 50)
 y <- sin(x)
 df_nonlinear <- data.frame(x = x, y = y)
 
@@ -299,46 +293,37 @@ cor(x, y)
 ```
 
 
+```{r}
+x <- 1:10
+y <- 1 + 2 * x
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
+  geom_point() +
+  geom_abline(intercept = 1, slope = 2)
+
+cor(x, y)
+```
+
+
+
+```{r}
+x <- 1:10
+y <- 1 - 2 * x
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
+  geom_point() +
+  geom_abline(intercept = 1, slope = -2)
+
+cor(x, y)
+```
+
+
 $$
 \text{e: exponent}\\
 3.517357e-16 = \frac{3.517357}{10 ^ {16}}\\
 10^6 = 1,000,000\\
 10^9 = 1,000,000,000
 $$
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ## Further reading
