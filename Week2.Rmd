@@ -120,9 +120,7 @@ NA + 2
 ```{r}
 ## Compute the mean by simply omitting the missing values
 mean(earnings$weight_kg, na.rm = TRUE)
-
 mean(earnings$height_cm)
-
 ## NA: missing/undefined value
 ```
 
@@ -141,12 +139,12 @@ ggplot(
     ## Add some random noise to all points to avoid overplotting
     position = "jitter",
     ## Transparency
-    alpha = 0.2
-    ) +
+    alpha = 0.25
+  ) +
   ## Add horizontal line at the average height (cm)
   geom_hline(yintercept = 169, color = "steelblue2") + 
   ## Add vertical line at the average weight (kg)
-  geom_vline(xintercept = 70, color = "firebrick4") +
+  geom_vline(xintercept = 70, color = "firebrick4")  +
   ## Add labels
   labs(
     x = "Weight (kg)",
@@ -154,40 +152,50 @@ ggplot(
     title = "Scatterplot weight and height"
   )
 ```
+
 From the points in the scatter-plot we see that heavier persons also tended to be taller persons.
 
+
 $$
+i = 1,\ldots,n = 1816 \text{ persons}\\
 x_i: \text{ weight of person } i\\
 y_i: \text{ height of person } i\\
+\text{Avearge values}:\\
+\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_i\\
+\bar{y} = \frac{1}{n}\sum_{i = 1}^n y_i\\
+$$
+$$
+(x_i - \bar{x}) \text{ the deviation of x_i (weight of person i) from the average weight}\\
+(y_i - \bar{y}) \text{ the deviation of y_i (height of person i) from the average height}\\
+(x_i - \bar{x})(y_i - \bar{y}) \text{ cross product of deviation from the means for perons i}
+$$
+
+
+$$
+\text{Cross product of deviations from the means}\\
+(x_i - \bar{x})(y_i - \bar{y})\\
 (x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the upper right part of the plot: high-high}\\
 (x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the lower left of the plot: low-low}\\
 (x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left of the plot: low-high}\\
 (x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left of the plot: high-low}
 $$
 $$
-\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}) = \sum_{i \in \text{low-low}}(x_i - \bar{x})(y_i - \bar{y}) + 
-\sum_{i \in \text{high-high}}(x_i - \bar{x})(y_i - \bar{y}) + \sum_{i \in \text{low-high}}(x_i - \bar{x})(y_i - \bar{y}) + 
-\sum_{i \in \text{high-low}}(x_i - \bar{x})(y_i - \bar{y})
+\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}) = \\
+\sum_{i \in \text{low-low}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{+} +
+\sum_{i \in \text{high-high}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{+} +\\ 
+\sum_{i \in \text{low-high}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{-} + 
+\sum_{i \in \text{high-low}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{-}
 $$
+
+
 
 ## Sample Covariance
-
-
-Some notation: 
-
-$$
-i = 1,\ldots,n = 1816 \text{ persons}\\
-\text{Avearge values}:\\
-\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_i\\
-\bar{y} = \frac{1}{n}\sum_{i = 1}^n y_i
-$$
 
 Sum of the cross-products over all observation (persons).
 
 $$
 Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y}) \text{ the sign of this sum depends on the arrangement of the points}
 $$
-
 ```{r}
 ## Compute the covariance between height_cm and weight_cm
 ## Omit missing values for weight: use complete obs instructs it to use only 
@@ -204,31 +212,26 @@ cov(earnings$height, earnings$weight, use = "complete.obs")
 ```{r}
 cov(earnings$height_cm, 1000 * earnings$weight_kg, use = "complete.obs")
 ```
-
 $$
-Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})
-$$
-$$
-(x_i - \bar{x})[kg](y_i - \bar{y})[cm] = (x_i - \bar{x})(y_i - \bar{y})[kg \times cm]
-$$
-$$
-\text{Room area}:\\
+\text{Room area: }
 2[m] \times 5[m] = 10[m \times m = m^2]
 $$
-
 Unites of measurements of the covariance
+
 $$
-Cov(x, y)[kg\times cm] = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})
+Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})\\
+(x_i - \bar{x})[kg]\times (y_i - \bar{y})[cm] = [kg \times cm] \text{ Unit of measurement for the covariance in this example}
 $$
+
 
 $$
 Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x})\\
-S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2 \text{ sample variance of x}\\
-S(x) = \sqrt{S^2(x)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2} \text{ sample standard deviation of x}\\ 
-S(y) = \sqrt{S^2(y)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (y_i - \bar{y})^2} \text{ sample standard deviation of y}\\ 
+S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2 \text{ sample variance of } x\\
+S(x) = \sqrt{S^2(x)} \text{ sample standard deviation of } x\\
+S(y) = \sqrt{S^2(y)} \text{ sample standard deviation of } y\\
+\rho(x, y) = \frac{Cov(x, y)[kg \times cm]}{S(x)[kg]S(y)[cm]} \text{ sample correlation between x and y}
 $$
 $$
-\rho(x, y) = \frac{Cov(x, y)}{S(x)S(y)} \text{ sample correlation between x and y}\\
 -1 \leq \rho(x, y) \leq 1
 $$
 
@@ -238,15 +241,11 @@ cor(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
 cor(earnings$height, earnings$weight, use = "complete.obs")
 ```
 
-$$
-\rho(x, y) = \frac{Cov(x, y)[kg \times cm]}{S(x)[kg]S(y)[cm]}: \text{ корелация между x и y}\\
--1 \leq \rho \leq 1
-$$
-
 ```{r}
-## r: random (случайно), unif: uniform (равномерно)
+## r: random, unif: uniform (равномерно)
 runif(100, min = -1, max = 1)
 ```
+
 
 ```{r}
 ## 
@@ -256,7 +255,6 @@ df_noassoc <- data.frame(
   x = runif(100, min = -1, max = 1),
   y = runif(100, min = -1, max = 1)
 )
-
 ggplot(data = df_noassoc, aes(x = x, y = y)) +
   geom_point() +
   geom_vline(xintercept = 0) +
@@ -265,37 +263,12 @@ ggplot(data = df_noassoc, aes(x = x, y = y)) +
 # Expected correlation for the points in this plot?
 # cov(df_noassoc$x, df_noassoc$y)
 cor(df_noassoc$x, df_noassoc$y)
-mean(df_noassoc$x)
-mean(df_noassoc$y)
 ```
-
-
-## Zero correlation
-
-Let's say you are given a correlation coefficient of 0 for weight and height.The correlation
-measures _linear_ association.
-
-
-
-
-```{r}
-## pi: 3.14
-x <- seq(0,  pi, length.out = 50)
-y <- sin(x)
-df_nonlinear <- data.frame(x = x, y = y)
-
-
-ggplot(data = df_nonlinear, aes(x = x, y = y)) +
-  geom_point()
-
-cor(x, y)
-## 
-```
-
+Perfect linear dependency (positive slope)
 
 ```{r}
 x <- 1:10
-y <- 1 + 2 * x
+y <- 500 + 0.1 * x
 
 ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
   geom_point() +
@@ -317,14 +290,29 @@ ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
 cor(x, y)
 ```
 
+## Zero correlation
 
+Let's say you are given a correlation coefficient of 0 for weight and height.The correlation
+measures _linear_ association.
+
+```{r}
+## pi: 3.14
+x <- seq(0 * pi , 1 * pi, length.out = 50)
+y <- sin(x)
+
+df_nonlinear <- data.frame(x = x, y = y)
+ggplot(data = df_nonlinear, aes(x = x, y = y)) +
+  geom_point()
+
+cor(x, y)
+## 
+```
 $$
 \text{e: exponent}\\
 3.517357e-16 = \frac{3.517357}{10 ^ {16}}\\
 10^6 = 1,000,000\\
 10^9 = 1,000,000,000
 $$
-
 
 ## Further reading
 
