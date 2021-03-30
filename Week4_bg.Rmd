@@ -1,0 +1,11 @@
+---
+title: "Week4"
+author: "Boyko Amarov"
+date: "3/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+invoices <- read.delim('https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/invoices.txt')
+str(invoices)
+```
