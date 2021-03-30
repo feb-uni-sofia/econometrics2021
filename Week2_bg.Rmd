@@ -44,11 +44,11 @@ mean(earnings$height) * 2.54
 #   earnings,
 #   height_cm = 2.54 * height,
 # )
-
 ## Еквивалентно на горния код
 earnings <- earnings %>%
   mutate(
     height_cm = 2.54 * height,
+    weight_kg = 0.45 * weight
   )
 ```
 
@@ -110,3 +110,74 @@ Bar charts
 ```{r}
 ggplot(earnings, aes(x = ethnicity)) + geom_bar()
 ```
+
+## Association
+
+```{r}
+mean(earnings$height_cm)
+## Средна стойност, като преди това премахва липсващи стойности
+mean(earnings$weight_kg, na.rm = TRUE)
+```
+
+
+Scatter plot
+
+```{r, fig.cap=""}
+## aes: aesthetics
+ggplot(data = earnings, aes(x = weight_kg, y = height_cm)) +
+  geom_point(position = "jitter", alpha = 0.2) +
+  geom_hline(yintercept = 169, color = "steelblue2") +
+  geom_vline(xintercept = 70, color = "firebrick")
+```
+По-тежките хора като тенденция са и по-високи на ръст.
+
+$$
+\underbrace{(x_i - \bar{x})}_{\geq 0}\underbrace{(y_i - \bar{y})}_{\geq 0} \geq 0: (\text{горе дясно})\\
+\underbrace{(x_i - \bar{x})}_{\leq 0}\underbrace{(y_i - \bar{y})}_{\leq 0} \geq 0: (\text{долу ляво})\\
+\underbrace{(x_i - \bar{x})}_{\leq 0}\underbrace{(y_i - \bar{y})}_{\geq 0} \leq 0: (\text{горе ляво})\\
+\underbrace{(x_i - \bar{x})}_{\geq 0}\underbrace{(y_i - \bar{y})}_{\leq 0} \leq 0: (\text{горе ляво})\\
+$$
+$$
+\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y}): \text{ знакът на този израз зависи от подребата на точките}
+$$
+(Емпирична) Ко-вариация (empirical Covariance)
+
+$$
+Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})
+$$
+
+Емпирична Дисперсия (empirical, sample) variance
+$$
+Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x}) =\\
+Cov(x, x) = Var(x) = S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2\\
+S(x) = \sqrt{S^2(x)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2}: \text{емп. стандартно отклонение, sample standard deviation}\\
+S(y) = \sqrt{S^2(y)} = \sqrt{\frac{1}{n - 1}\sum_{i = 1}^{n} (y_i - \bar{y})^2}: \text{емп. стандартно отклонение, sample standard deviation}
+$$
+$$
+\rho(x, y) = \frac{Cov(x, y)}{S(x)S(y)}: \text{ корелация между x и y}\\
+-1 \leq \rho \leq 1
+$$
+```{r}
+## Covariance (complete.obs: използвай наблюдения без липсващи стойности)
+cov(earnings$weight_kg, earnings$height_cm, use = "complete.obs")
+
+##
+cor(earnings$weight_kg, earnings$height_cm, use = "complete.obs")
+```
+
+
+
+## Correlation
+
+$$
+x_i: \text{тегло в кг.}\\
+y_i: \text{ръст в кг.} \\
+i = 1,\ldots, n (= 1816 \text{ в настоящия пример})\\
+(x_1, x_2,\ldots,x_n)\\
+\bar{x} = \frac{1}{n}\sum_{i = 1}^{n} x_i\\
+\bar{y} = \frac{1}{n}\sum_{i = 1}^{n} y_i\\
+
+$$
+
+
+
