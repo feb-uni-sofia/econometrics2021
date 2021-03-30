@@ -5,6 +5,352 @@ date: "3/8/2021"
 output: html_document
 ---
 
+
+---
+title: 'Week2: basic data summaries'
+author: "Boyko Amarov"
+date: "3/8/2021"
+output: html_document
+---
+
+## Data import
+
+```{r, setup, message=FALSE}
+## Load packages
+library(tidyverse)
+## Read the data
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+```
+
+
+```{r}
+glimpse(earnings)
+```
+
+Data description
+
+- _height_ (numeric): height in inches (1 inch = 2.54 cm)
+- _weight_ (numeric): weight in pounds (1 pound $\approx$ 0.45 kilograms)
+- _male_ (numeric): 1 if a person is male, 0 otherwise
+- _earn_ (numeric): annual income in USD
+- _earnk_ (numeric): annual income in 1000 USD
+- _ethnicity_ (character): ethnicity
+- _age_ (numeric): Age of the person in years
+
+Create a new column holding the height in cm. We use the `mutate` function for this task.
+
+```{r}
+##
+## earnings <- mutate(earnings, height_cm = 2.54 * height)
+## Equivalently using pipes:
+earnings <- earnings %>%
+  mutate(
+    height_cm = 2.54 * height,
+    weight_kg = 0.45 * weight
+  )
+```
+
+```{r}
+mean(earnings$height_cm)
+```
+The average height of the persons was 169 cm.
+
+```{r}
+summary(earnings$height_cm)
+```
+```{r}
+mean(earnings$height_cm < 162.6)
+```
+The tallest person was 208 cm tall. The shortest person was 144.8 cm. Median equals 167.6 cm meaning that: _about_ half of the persons
+in the survey were shorter than 167.6 cm (median/2nd quartile/0.5 quantile/50% percentile). 1st quartile equals 162.6: _roughly_ (because of rounding in height value) one quarter (25%) were shorter than 162.6 cm. 3th quartile equals 175.9 cm: _about_ 75% (three quarters) of the persons were shorter than 175.9 cm.
+
+## Box-Whiskers plot
+
+```{r}
+ggplot(data = earnings, aes(x = height_cm, y = ethnicity)) + geom_boxplot()
+```
+```{r}
+ggplot(data = earnings, aes(x = height_cm, y = factor(male))) + geom_boxplot()
+```
+
+```{r}
+## Extreme case of no variation in the data (all values equal)
+summary(c(2, 2, 2, 2, 2, 2, 2))
+ggplot(data = data.frame(x = c(2, 2, 2, 2, 2, 2, 2)), aes(x = x)) + geom_boxplot()
+```
+
+1. Location: (measured by the median)
+2. Spread: (distance between min/max and between the 1st and the 3the quartiles)
+3. Outliers: observations that are different from the rest of the observations (persons)
+
+For _categorical_ variables we use frequency tables as a summary.
+
+```{r}
+table(earnings$ethnicity)
+```
+
+```{r}
+ggplot(data = earnings, aes(x = ethnicity)) + geom_bar()
+```
+
+There are 180 black persons in the dataset.
+
+## Measurement scales
+
+```{r}
+earnings <- earnings %>%
+  mutate(
+    sex = ifelse(male == 1, "Male", "Female")
+  )
+```
+
+Categorical scales:
+
+1. **Nominal**: Values of the variable have no numeric meaning. Values are only labels indicating group membership.
+2. **Ordinal**: Values of the variable are just labels (as is the case with the nominal scale), but the labels are ordered.
+ school grades
+ "2" "3" "4" "5" "6"
+
+Numeric scales
+<!-- 3. **Interval**: -->
+4. **Ratio scale**: Numeric scale, ratios between values make sense.
+
+
+## Association
+
+Scatter plot
+
+```{r}
+NA + 2
+```
+
+
+```{r}
+## Compute the mean by simply omitting the missing values
+mean(earnings$weight_kg, na.rm = TRUE)
+mean(earnings$height_cm)
+## NA: missing/undefined value
+```
+
+
+```{r}
+ggplot(
+  data = earnings, 
+  ## aes: aesthetics
+  mapping = aes(
+    x = weight_kg, 
+    y = height_cm
+    )
+  ) +
+  ## Add points
+  geom_point(
+    ## Add some random noise to all points to avoid overplotting
+    position = "jitter",
+    ## Transparency
+    alpha = 0.25
+  ) +
+  ## Add horizontal line at the average height (cm)
+  geom_hline(yintercept = 169, color = "steelblue2") + 
+  ## Add vertical line at the average weight (kg)
+  geom_vline(xintercept = 70, color = "firebrick4")  +
+  ## Add labels
+  labs(
+    x = "Weight (kg)",
+    y = "Height (cm)",
+    title = "Scatterplot weight and height"
+  )
+```
+
+From the points in the scatter-plot we see that heavier persons also tended to be taller persons.
+
+
+$$
+i = 1,\ldots,n = 1816 \text{ persons}\\
+x_i: \text{ weight of person } i\\
+y_i: \text{ height of person } i\\
+\text{Avearge values}:\\
+\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_i\\
+\bar{y} = \frac{1}{n}\sum_{i = 1}^n y_i\\
+$$
+$$
+(x_i - \bar{x}) \text{ the deviation of x_i (weight of person i) from the average weight}\\
+(y_i - \bar{y}) \text{ the deviation of y_i (height of person i) from the average height}\\
+(x_i - \bar{x})(y_i - \bar{y}) \text{ cross product of deviation from the means for perons i}
+$$
+
+
+$$
+\text{Cross product of deviations from the means}\\
+(x_i - \bar{x})(y_i - \bar{y})\\
+(x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the upper right part of the plot: high-high}\\
+(x_i - \bar{x})(y_i - \bar{y}) \geq 0 \text{ for persons in the lower left of the plot: low-low}\\
+(x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left of the plot: low-high}\\
+(x_i - \bar{x})(y_i - \bar{y}) \leq 0 \text{ for persons in the upper left of the plot: high-low}
+$$
+$$
+\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}) = \\
+\sum_{i \in \text{low-low}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{+} +
+\sum_{i \in \text{high-high}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{+} +\\ 
+\sum_{i \in \text{low-high}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{-} + 
+\sum_{i \in \text{high-low}}\underbrace{(x_i - \bar{x})(y_i - \bar{y})}_{-}
+$$
+
+
+
+## Sample Covariance
+
+Sum of the cross-products over all observation (persons).
+
+$$
+Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y}) \text{ the sign of this sum depends on the arrangement of the points}
+$$
+```{r}
+## Compute the covariance between height_cm and weight_cm
+## Omit missing values for weight: use complete obs instructs it to use only 
+## the persons with available height and weight measurements (no missing)
+
+cov(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
+```
+
+```{r}
+cov(earnings$height, earnings$weight, use = "complete.obs")
+```
+
+
+```{r}
+cov(earnings$height_cm, 1000 * earnings$weight_kg, use = "complete.obs")
+```
+
+$$
+\text{Room area: }
+2[m] \times 5[m] = 10[m \times m = m^2]
+$$
+Unites of measurements of the covariance
+
+$$
+Cov(x, y) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(y_i - \bar{y})\\
+(x_i - \bar{x})[kg]\times (y_i - \bar{y})[cm] = [kg \times cm] \text{ Unit of measurement for the covariance in this example}
+$$
+
+
+$$
+Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x})\\
+S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2 \text{ sample variance of } x\\
+S(x) = \sqrt{S^2(x)} \text{ sample standard deviation of } x\\
+S(y) = \sqrt{S^2(y)} \text{ sample standard deviation of } y\\
+\rho(x, y) = \frac{Cov(x, y)[kg \times cm]}{S(x)[kg]S(y)[cm]} \text{ sample correlation between x and y}
+$$
+$$
+-1 \leq \rho(x, y) \leq 1
+$$
+
+```{r}
+## Compute the correlation between weight and height
+cor(earnings$height_cm, earnings$weight_kg, use = "complete.obs")
+cor(earnings$height, earnings$weight, use = "complete.obs")
+```
+
+```{r}
+## r: random, unif: uniform (равномерно)
+runif(100, min = -1, max = 1)
+```
+
+
+```{r}
+## 
+df_noassoc <- data.frame(
+  ## Select 100 values at random from [-1,k 1]
+  ## random numbers from the uniform distribution
+  x = runif(100, min = -1, max = 1),
+  y = runif(100, min = -1, max = 1)
+)
+ggplot(data = df_noassoc, aes(x = x, y = y)) +
+  geom_point() +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0)
+
+# Expected correlation for the points in this plot?
+# cov(df_noassoc$x, df_noassoc$y)
+cor(df_noassoc$x, df_noassoc$y)
+```
+Perfect linear dependency (positive slope)
+
+```{r}
+x <- 1:10
+y <- 500 + 0.1 * x
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
+  geom_point() +
+  geom_abline(intercept = 1, slope = 2)
+
+cor(x, y)
+```
+
+
+
+```{r}
+x <- 1:10
+y <- 1 - 2 * x
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
+  geom_point() +
+  geom_abline(intercept = 1, slope = -2)
+
+cor(x, y)
+```
+
+## Zero correlation
+
+Let's say you are given a correlation coefficient of 0 for weight and height.The correlation
+measures _linear_ association.
+
+```{r}
+## pi: 3.14
+x <- seq(0 * pi , 1 * pi, length.out = 50)
+y <- sin(x)
+
+df_nonlinear <- data.frame(x = x, y = y)
+ggplot(data = df_nonlinear, aes(x = x, y = y)) +
+  geom_point()
+
+cor(x, y)
+## 
+```
+$$
+\text{e: exponent}\\
+3.517357e-16 = \frac{3.517357}{10 ^ {16}}\\
+10^6 = 1,000,000\\
+10^9 = 1,000,000,000
+$$
+
+## Further reading
+
+[R for data science](https://r4ds.had.co.nz/index.html)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Data import
 
 ```{r, setup, message=FALSE}
