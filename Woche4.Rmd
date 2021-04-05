@@ -41,7 +41,7 @@ ggplot(data = invoices, aes(x = Invoices, y = Time)) +
   # geom_abline(intercept = 0.64, slope = 0.011, color = "firebrick4")
 ```
 
-Schätzung für die Bearbeitungszeit, die das Unternehmen für 80, 120, 250
+Schätzung für die Bearbeitungszeit, die das Unternehmen für 80, 120, 250 Rechnungen braucht.
 
 Schätzung für 120 Rechnungen?
 
