@@ -15,10 +15,11 @@ using [Skype](https://join.skype.com/e06WWjwOrFbq).
 
 All classes will follow the same material, so you can choose any one of these dates.
 
-## Homeworks 
+## Homeworks
 
 Homework 0: [https://classroom.github.com/g/AgP6lrPG](https://classroom.github.com/g/AgP6lrPG)
 Homework 1: [https://classroom.github.com/g/py3GnxFj](https://classroom.github.com/g/py3GnxFj), due Apr 20, 2021, 11:00.
+
 ## Grading
 
 The final grade will be based on a homework project after the end of the term. The homeworks during the term are _not_ mandatory.
