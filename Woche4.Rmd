@@ -14,13 +14,13 @@ invoices <- read.delim('https://raw.githubusercontent.com/feb-uni-sofia/economet
 glimpse(invoices)
 ```
 
-Data descriptioin:
+Datenbeschreibung:
 
-- `Day` (numeric): day
-- `Invoices` (numeric): number of invoices
-- `Time` (numeric): Time needed to process the invoices (hours)
+- `Day` (numeric): Tag der Beobachtung
+- `Invoices` (numeric): Zahl der eingegangenen Rechnungen
+- `Time` (numeric): Bearbeitungszeit (Stunden)
 
-Task is to predict the time needed to process 50, 120, 200, 250 invoices.
+
 
 ```{r}
 summary(invoices$Time)
@@ -29,69 +29,40 @@ summary(invoices$Time)
 
 ```{r}
 ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
-  geom_point() + 
-  geom_vline(xintercept = c(50, 200, 250), lty = 2, alpha = 0.3) +
-  geom_vline(xintercept = 120, lty = 2) + 
-  geom_hline(yintercept = mean(invoices$Time)) + 
-  geom_abline(intercept = 0, slope = 0.015, color = "steelblue2") +
-  geom_abline(intercept = 0.64, slope = 0.011, color = "firebrick4")
+  geom_point() +
+  labs(
+    x = "Anzahl von Rechnungen",
+    y = "Bearbeitungszeit"
+  )+
+  geom_vline(xintercept = 120, lty = 2, alpha = 1) +
+  geom_vline(xintercept = c(80, 250), lty = 2, alpha = 0.3) +
+  geom_hline(yintercept = mean(invoices$Time)) +
+  geom_abline(intercept = 0, slope = 0.015, color = "steelblue2")
+  # geom_abline(intercept = 0.64, slope = 0.011, color = "firebrick4")
 ```
 
-Strategy 1: use the observed value for 120 invoices (2.5 h) as a prediction
-Strategy 2: use the (daily) average processing time (this will overestimate low work loads (low number of invoices) and will underestimate high work loads, because there is an increasing 
-pattern in the data: high work loads are associated with longer work time).
+Schätzung für die Bearbeitungszeit, die das Unternehmen für 80, 120, 250
 
-Strategy 3: use the average time to process one invoice?
+Schätzung für 120 Rechnungen?
 
-$$
-i = 1,\ldots,n = 30\\
-x_i: \text{ number of invoices in day } i \\
-y_i: \text{ processing time in day } i \\
-$$
 
 $$
-y_i = \alpha + \beta x_i, \quad i = 1,\ldots,n\\
-\alpha = 0, \beta = 0.015\\
-y_i = 0 + 0.015 x_i \text{ (blue line)}
+i = 1,\ldots,n = 30 \text{ Tage} \\
+x_i: \text{ Anzahl von Rechnungen an Tag } i \\
+y_i: \text{ Bearbeitungszeit an Tag } i \\
 $$
 $$
-\text{Estimated time to process 120 invoices}\\
-\hat{y}_{x = 120} = 0 + 0.015 \times 120 = 1.8 \text{ hours}
+y [\text{Stunden}] = \underbrace{0}_{\text{Achsenabschnitt (intercept)}}[\text{Stunden}] + \underbrace{0.015}_{\text{Steigung (slope)}}[\frac{\text{Stunden}}{\text{Rechnung}}] x [\text{Anzahl Rechnungen}]
 $$
 
 $$
-y_i = \underbrace{\alpha + \beta x_i}_{\text{line/systematic part}} + \underbrace{e_i}_{\text{deviation from the line, stochastic (random) part}}
-$$
-Assumptions about $e_i$, we assume that the deviations are zero on average.
-
-$$
-E(e_i) = 0 \text{ zero on average}
+\hat{y}_{x = 120} = 0 + 0.015 \times 120 = 1.8 \text{ (Stunden)}
 $$
 $$
-\hat{y} = \alpha + \beta x
-$$
-
-## OLS estimator
-
-Usd the *O*rdinary *L*east *S*quares estimator to find "guesses" for alpha and beta.
-
-```{r}
-## lm: linear model
-fit <- lm(Time ~ 1 + Invoices, data = invoices)
-fit
-```
-
-$$
-\hat{\alpha} = 0.64 {\text{ OLS guess for } \alpha }\\
-\hat{\beta} = 0.011 {\text{ OLS guess for } \beta} \\
-\hat{y} = \hat{\alpha} + \hat{\beta}x\\
-\hat{y} = 0.64 + 0.011x \text{ OLS guess for the equation}\\
-\hat{y}_{x = 120} = 0.64 + 0.011 \times 120 = 1.96 \text{ hours}
-$$
-$$
-
-y_i [\text{hours}] = \alpha [\text{hours}] + \beta\left[\frac{\text{hours}}{\text{invoice}}\right] x_i [\text{Number of invoices}] + e_i [\text{hours}]
+\hat{y}_{x = 80} = 0 + 0.015 \times 80 = 1.2 \text{ (Stunden)}
 $$
 
 
-
+$$
+y_i = \underbrace{\alpha + \beta x_i}_{\text{Gerade}} + \underbrace{e_i}_{\text{Abweichung von der Gerade für Tag i}}
+$$
