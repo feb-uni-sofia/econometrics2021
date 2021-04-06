@@ -8,5 +8,166 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 invoices <- read.delim('https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/invoices.txt')
-str(invoices)
 ```
+
+
+```{r}
+glimpse(invoices)
+```
+
+Описание:
+
+- `Day` (numeric): day
+- `Invoices` (numeric): number of invoices
+- `Time` (numeric): Time needed to process the invoices (hours)
+
+Task is to predict the time needed to process 50, 120, 200, 250 invoices.
+
+```{r}
+summary(invoices$Time)
+```
+
+
+```{r}
+ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
+  geom_point() +
+  geom_vline(xintercept = c(80, 250), lty = 2, alpha = 0.3) +
+  geom_vline(xintercept = 120, lty = 2) +
+  geom_hline(yintercept = 2.110) +
+  geom_abline(intercept = 0.1, slope = 0.015, colour = "steelblue2")
+```
+
+Estimate the expected processing time for 80, 120 and 250 invoices (3 estimates).
+
+Strategy 1: Use the average processing time for the predictions
+
+$$
+i = 1,\ldots,n = 30\\
+x_i: \text{ number of invoices on day } i \\
+y_i: \text{ processing time on day } i \\
+$$
+
+$$
+y[\text{hours}] = 0.1[\text{hours}] + \underbrace{0.015\left[\frac{\text{hours}}{\text{invoice}}\right] x[\text{numb. invoices}]}_{\text{hours}}\\
+x = 0 \implies y [\text{hours}] = 0.1 [\text{hours}]
+$$
+
+$$
+50 [m^2] \text{ room}\\
+\text{rent } 2[\frac{BGN}{m^2}]\\
+2 [\frac{BGN}{m^2}] \times 50 [m^2] = 100 [BGN]
+$$
+$$
+y[\text{costs}] = 0.1[\text{fixed costs}] + 0.015[\text{marginal cost}]x[\text{production}]
+$$
+$$
+y_{x = 120} = 0.1 + 0.015 \times 120 = 1.9 [\text{hours}]
+$$
+$$
+y = \underbrace{0.1}_{\text{intercept}} + \underbrace{0.015}_{\text{slope}}x
+$$
+$$
+y_i  = \underbrace{0.1 + 0.015x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation from the line, stochastic (random) part}}
+$$
+```{r}
+x <- 190
+line_part <- 0.1 + 0.015 * x
+deviation_part <- runif(1, min = -1, max = 1)
+deviation_part
+y <- line_part + deviation_part
+y
+```
+
+```{r}
+rand_numbers <- runif(10000, min = -1, max = 1)
+# rand_numbers
+mean(rand_numbers)
+```
+
+Assume that the deviation part is zero on average.
+
+$$
+E(e_i) = 0 \text{ assumption} \implies \\
+E(y_i) = E(0.1 + 0.015x_i + e_i) =\\ 
+E(y_i) = E(0.1) + E(0.015x_i) + E(e_i) = \\
+E(y_i) = 0.1 + 0.015x_i
+$$
+Assume:
+
+$$
+y [\text{hours}] = 0.1[\text{hours}] + \underbrace{0.015 \left[\frac{\text{hours}}{\text{invoice}}\right]}_{\text{hours}} x[\text{invoices}]\\
+\text{for } x = 0 \implies \\
+y [\text{hours}] = 0.1[\text{hours}]
+$$
+
+
+$$
+y [\text{costs}] = 0.1[\text{fixed costs}] + 0.015 [\text{marginal cost}] x [\text{volume of work}]
+$$
+$$
+y  = 0.1[\text{Intercept}] + 0.015[\text{slope}]x\\
+y_{x = 0} = 0.1
+$$
+$$
+y_i = \underbrace{\alpha + \beta x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation, stochastic (random) part}}, \quad i = 1,\ldots,n
+$$
+
+$$
+x = 120 \\
+y_i = \underbrace{\alpha + \beta 120}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{result of a dice}}, \quad i = 1,\ldots,n
+$$
+```{r}
+mean(runif(1000, min = -1, max = 1))
+```
+
+Assume that $e_i$ are zero on average.
+
+$$
+E(e_i) = 0\\
+$$
+$$
+E(y_i) = E(\alpha + \beta x_i + e_i) = \\
+\underbrace{E(\alpha + \beta x_i)}_{\alpha + \beta x_i} + \underbrace{E(e_i)}_{0} \implies\\
+E(y_i) = \alpha + \beta x_i
+$$
+
+
+
+
+
+
+
+
+$$
+y_i [\text{hours}] = 0.1[\text{hours}] + \underbrace{
+0.015\left[\frac{\text{hours}}{\text{invoice}}\right] x_i [\text{number of invoices}]}_{\text{hours}},
+\quad i = 1,\ldots,n
+$$
+Predictions using this equation:
+
+$$
+\hat{y}_{x = 120} = 0.1 + 0.015 \times 120 = 1.9 \text{ hours}
+$$
+
+$$
+\underbrace{y}_{\text{costs in terms of time}} = \\ 
+\underbrace{0.1}_{\text{fixed costs}} + \\
+\underbrace{0.015}_{\text{marginal costs}}\\ \underbrace{x}_{\text{number of invoices (work)}}
+$$
+
+$$
+y_i = \underbrace{\alpha + \beta x_i}_{\text{line: systematic part}} + \underbrace{e_i}_{\text{deviation from the line: stochastic (random) part}}
+$$
+
+Assume that the $e_i$ are random (like dice throw). Assume that the deviations are zero on average.
+
+$$
+E(e_i) = 0 \text{ expected value of } e_i \text{ equals zero}
+$$
+$$
+E(y_i) = E(\alpha + \beta x_i + e_i) = \\
+\alpha + \beta x_i + E(e_i) = \\
+E(y_i) = \underbrace{\alpha + \beta x_i}_{line} \text{ the expected processing time}
+$$
+Next time: ordinary least squares estimator
+
