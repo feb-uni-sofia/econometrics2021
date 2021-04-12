@@ -46,34 +46,51 @@ i = 1,\ldots,n = 30\\
 x_i: \text{ number of invoices on day } i \\
 y_i: \text{ processing time on day } i \\
 $$
+Assume a simple (linear) functional relationship
+
+$$
+y = 0.1 + 0.015x
+$$
+
+
 
 $$
 y[\text{hours}] = 0.1[\text{hours}] + \underbrace{0.015\left[\frac{\text{hours}}{\text{invoice}}\right] x[\text{numb. invoices}]}_{\text{hours}}\\
 x = 0 \implies y [\text{hours}] = 0.1 [\text{hours}]
 $$
 
+
 $$
 50 [m^2] \text{ room}\\
 \text{rent } 2[\frac{BGN}{m^2}]\\
 2 [\frac{BGN}{m^2}] \times 50 [m^2] = 100 [BGN]
 $$
+
 $$
 y[\text{costs}] = 0.1[\text{fixed costs}] + 0.015[\text{marginal cost}]x[\text{production}]
 $$
+
 $$
 y_{x = 120} = 0.1 + 0.015 \times 120 = 1.9 [\text{hours}]
 $$
+
 $$
 y = \underbrace{0.1}_{\text{intercept}} + \underbrace{0.015}_{\text{slope}}x
 $$
+
 $$
 y_i  = \underbrace{0.1 + 0.015x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation from the line, stochastic (random) part}}
 $$
+
+
 ```{r}
 x <- 190
 line_part <- 0.1 + 0.015 * x
+
 deviation_part <- runif(1, min = -1, max = 1)
+
 deviation_part
+
 y <- line_part + deviation_part
 y
 ```
@@ -92,25 +109,110 @@ E(y_i) = E(0.1 + 0.015x_i + e_i) =\\
 E(y_i) = E(0.1) + E(0.015x_i) + E(e_i) = \\
 E(y_i) = 0.1 + 0.015x_i
 $$
-Assume:
+
+## Coefficient estimation
 
 $$
-y [\text{hours}] = 0.1[\text{hours}] + \underbrace{0.015 \left[\frac{\text{hours}}{\text{invoice}}\right]}_{\text{hours}} x[\text{invoices}]\\
-\text{for } x = 0 \implies \\
-y [\text{hours}] = 0.1[\text{hours}]
+y = 0.1 + 0.015x + e_i
 $$
+Predicted y (expected value of y) for every observation
+
+$$
+\hat{y}_i = 0.1 + 0.015x_i
+$$
+```{r}
+invoices <- invoices %>%
+  mutate(
+    y_predicted_1 = 0.1 + 0.015 * Invoices
+  )
+
+## Code for illustration purposes
+
+ggplot(data = invoices, aes(x = Invoices, y = Time)) +
+  geom_point(size = 2) +
+  geom_segment(
+    aes(xend = Invoices, yend = y_predicted_1),
+    size = 1 / 4
+  ) +
+  geom_line(aes(y = y_predicted_1), color = "steelblue2")
+```
+
+
+Difference between observed and expected (predicted) processing time.
+
+$$
+r_i  =y_i - \hat{y}_{i} \text{ residual for day } i
+$$
+
+Distance between expected and observed values (processing time).
+
+$$
+y_i = \alpha + \beta x_i + e_i\\
+\hat{y}_{i} = \hat{\alpha} + \hat{\beta} x \quad \hat{\alpha} \text{ guess for } \alpha \quad \hat{\beta} \text{ guess for } \beta\\
+\underbrace{\min}_{\hat{\alpha}, \hat{\beta}} \sum_{i = 1}^{n} (y_i - \hat{y}_{i})^2\\
+
+E(y) = \alpha  +\beta x\\
+\hat{E}(y) = \hat{\alpha}  + \hat{\beta} x\\
+$$
+Result of minimisation is what we call the (ordinary) least squares estimator.
+
+
+```{r}
+## lm: linear model
+fit <- lm(Time ~ 1 + Invoices, data = invoices)
+## OLS estimates for alpha (Intercep) and beta (the coefficient for Invoices)
+fit
+```
+Estimated equation
 
 
 $$
-y [\text{costs}] = 0.1[\text{fixed costs}] + 0.015 [\text{marginal cost}] x [\text{volume of work}]
+\hat{E}(y) = \hat{y}^{OLS} = 0.64 + 0.011 x
 $$
-$$
-y  = 0.1[\text{Intercept}] + 0.015[\text{slope}]x\\
-y_{x = 0} = 0.1
-$$
+
+
+```{r}
+ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
+  geom_point() +
+  geom_hline(yintercept = 2.110) +
+  geom_abline(intercept = 0.1, slope = 0.015, colour = "steelblue2") + 
+  geom_abline(intercept = 0.64, slope = 0.011, colour = "firebrick")
+```
+
+```{r}
+ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+
+## Plot the OLS estimated line
+
+```{r}
+## Calculate the predicted y using the OLS estimates (guesses) for alpha and beta
+invoices <- invoices %>%
+  mutate(
+    y_OLS = 0.64 + 0.011 * Invoices
+  )
+```
+
+
+
+
+```{r}
+ggplot(data = invoices, aes(x = Invoices, y = Time)) +
+  geom_point(size = 2, shape = 1) +
+  geom_segment(
+    aes(xend = Invoices, yend = Est_mean),
+    size = 1 / 4
+  ) +
+  geom_line(aes(y = Est_mean))
+```
+
 $$
 y_i = \underbrace{\alpha + \beta x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation, stochastic (random) part}}, \quad i = 1,\ldots,n
 $$
+
 
 $$
 x = 120 \\
@@ -173,6 +275,12 @@ Next time: ordinary least squares estimator
 
 
 
+```{r}
+tmp <- lm(Time ~ Invoices, data = invoices)
+summary(tmp)
+r <- residuals(tmp)
+sqrt(var(r) * (29 / (30 - 2)))
+```
 
 
 <!-- Strategy 1: use the observed value for 120 invoices (2.5 h) as a prediction -->
@@ -227,3 +335,16 @@ Next time: ordinary least squares estimator
 <!-- y_i [\text{hours}] = \alpha [\text{hours}] + \beta\left[\frac{\text{hours}}{\text{invoice}}\right] x_i [\text{Number of invoices}] + e_i [\text{hours}] -->
 <!-- $$ -->
 
+## Residuals
+
+```{r}
+invoices$Est_mean <- predict(lm(Time ~ Invoices, data = invoices))
+invoices %>%
+  ggplot(aes(x = Invoices, y = Time)) +
+  geom_point(size = 2, shape = 1) +
+  geom_segment(
+    aes(xend = Invoices, yend = Est_mean),
+    size = 1 / 4
+  ) +
+  geom_line(aes(y = Est_mean))
+```
