@@ -199,15 +199,15 @@ invoices <- invoices %>%
 
 
 
-```{r}
-ggplot(data = invoices, aes(x = Invoices, y = Time)) +
-  geom_point(size = 2, shape = 1) +
-  geom_segment(
-    aes(xend = Invoices, yend = Est_mean),
-    size = 1 / 4
-  ) +
-  geom_line(aes(y = Est_mean))
-```
+<!-- ```{r} -->
+<!-- ggplot(data = invoices, aes(x = Invoices, y = Time)) + -->
+<!--   geom_point(size = 2, shape = 1) + -->
+<!--   geom_segment( -->
+<!--     aes(xend = Invoices, yend = Est_mean), -->
+<!--     size = 1 / 4 -->
+<!--   ) + -->
+<!--   geom_line(aes(y = Est_mean)) -->
+<!-- ``` -->
 
 $$
 y_i = \underbrace{\alpha + \beta x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation, stochastic (random) part}}, \quad i = 1,\ldots,n
