@@ -37,7 +37,9 @@ ggplot(data = invoices, aes(x = Invoices, y = Time)) +
   geom_vline(xintercept = 120, lty = 2, alpha = 1) +
   geom_vline(xintercept = c(80, 250), lty = 2, alpha = 0.3) +
   geom_hline(yintercept = mean(invoices$Time)) +
-  geom_abline(intercept = 0, slope = 0.015, color = "steelblue2")
+  geom_abline(intercept = 0, slope = 0.015, color = "steelblue2") +
+  geom_abline(intercept = 2, slope = 0.015, color = "firebrick")
+  
   # geom_abline(intercept = 0.64, slope = 0.011, color = "firebrick4")
 ```
 
@@ -62,7 +64,81 @@ $$
 \hat{y}_{x = 80} = 0 + 0.015 \times 80 = 1.2 \text{ (Stunden)}
 $$
 
+## Ökonomische Interpretation
 
 $$
-y_i = \underbrace{\alpha + \beta x_i}_{\text{Gerade}} + \underbrace{e_i}_{\text{Abweichung von der Gerade für Tag i}}
+y[Kosten] = 0[Fixkosten] + 0.015[Grenzkosten/\text{marginal cost}]x
 $$
+$$
+y_i = \underbrace{0 + 0.015 x_i}_{\text{Gerade, systematisches Teil}} + \underbrace{e_i}_{\text{Stochastisches (zufällig) Teil, Abweichung von der Gerade für Tag i}}
+$$
+
+$e_i$: Zufallsvariable (Lotto)
+
+Spiele haben Regeln.
+
+
+Wie viel werde ich im Durchschnitt gewinnen, wenn ich lange (viele Spiele, viele Lottotickets) genug spiele? > Erwartungswert
+
+```{r}
+## Spiel: Gleichverteilung auf [-1, 1]: Grob gesagt: jede Zahl zwischn -1 und 1 hat dieselbe Chance gezogen zu werden
+
+x <- runif(2, min = -1, max = 1)
+x
+mean(x)
+```
+
+Annahme: im Schnitt (Erwartungswert) sind die Terme $e_i$ null.
+
+$$
+E(e_i) = 0\\
+E(y_i) = E(0 + 0.015x + e_i)\\
+E(y_i) = E(0) + E(0.015x) + E(e_i)\\
+E(y_i) = 0 + 0.015x
+$$
+
+Systematisches Teil beschreibt die erwartete Bearbeitungszeit.
+
+
+$$
+y_i = 0 + 0.015x + e_i
+$$
+
+```{r}
+## Nur zur Illustration
+invoices <- invoices %>%
+  mutate(
+    y_predicted_1 = 0 + 0.015 * Invoices
+  )
+
+ggplot(data = invoices, aes(x = Invoices, y = Time)) +
+  geom_point(size = 2) +
+  geom_segment(
+    aes(xend = Invoices, yend = y_predicted_1),
+    size = 1 / 4
+  ) +
+  geom_line(aes(y = y_predicted_1), color = "steelblue2")
+```
+
+Differenz zwischen beobachteter Bearbeitungszeit und erwarteter Bearbeitungszeit.
+$$
+y_i - \hat{y}_{i}
+$$
+Abstand zwischen Beobachtungen und Erwartungen.
+$$
+y_i = \alpha + \beta x_i + e_i \\
+\hat{y}_i = \hat{\alpha} + \hat{\beta}x\\
+(\hat{\alpha}_{KQ}, \hat{\beta}_{KQ})  = \min_{\alpha, \beta} \sum_{i = 1}^{n} (y_i - \hat{y}_i) ^ 2
+$$
+KQ: Kleinste Quadrate
+
+```{r}
+## lm: linear model
+lm(Time ~ 1 + Invoices, data = invoices)
+```
+
+$$
+\hat{y}_{KQ, i} = \underbrace{0.64}_{Intercept} + \underbrace{0.011}_{Invoices} x
+$$
+Geschätzte _erwartete_ Bearbeitungszeit ist gleich 0.64 Stunden (geschätzte Fixkosten) plus 0.011 Stunden pro Rechnung (geschätzte Grenzkosten).
+
