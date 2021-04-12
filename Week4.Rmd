@@ -84,21 +84,18 @@ $$
 
 
 ```{r}
-x <- 190
-line_part <- 0.1 + 0.015 * x
-
-deviation_part <- runif(1, min = -1, max = 1)
-
-deviation_part
-
-y <- line_part + deviation_part
+x <- 190 ## Number of invoices
+e <- runif(1, min = -1, max = 1) ## Uniform distribution on [-1, 1]
+e
+y <- 0.1 + 0.015 * x + e
 y
 ```
 
 ```{r}
-rand_numbers <- runif(10000, min = -1, max = 1)
+rand_numbers <- runif(10, min = -1, max = 1)
 # rand_numbers
-mean(rand_numbers)
+paste("Average result from a game:", mean(rand_numbers))
+rand_numbers
 ```
 
 Assume that the deviation part is zero on average.
@@ -120,94 +117,69 @@ Predicted y (expected value of y) for every observation
 $$
 \hat{y}_i = 0.1 + 0.015x_i
 $$
-```{r}
-invoices <- invoices %>%
-  mutate(
-    y_predicted_1 = 0.1 + 0.015 * Invoices
-  )
-
-## Code for illustration purposes
-
-ggplot(data = invoices, aes(x = Invoices, y = Time)) +
-  geom_point(size = 2) +
-  geom_segment(
-    aes(xend = Invoices, yend = y_predicted_1),
-    size = 1 / 4
-  ) +
-  geom_line(aes(y = y_predicted_1), color = "steelblue2")
-```
-
-
-Difference between observed and expected (predicted) processing time.
-
-$$
-r_i  =y_i - \hat{y}_{i} \text{ residual for day } i
-$$
-
-Distance between expected and observed values (processing time).
-
-$$
-y_i = \alpha + \beta x_i + e_i\\
-\hat{y}_{i} = \hat{\alpha} + \hat{\beta} x \quad \hat{\alpha} \text{ guess for } \alpha \quad \hat{\beta} \text{ guess for } \beta\\
-\underbrace{\min}_{\hat{\alpha}, \hat{\beta}} \sum_{i = 1}^{n} (y_i - \hat{y}_{i})^2\\
-
-E(y) = \alpha  +\beta x\\
-\hat{E}(y) = \hat{\alpha}  + \hat{\beta} x\\
-$$
-Result of minimisation is what we call the (ordinary) least squares estimator.
-
-
-```{r}
-## lm: linear model
-fit <- lm(Time ~ 1 + Invoices, data = invoices)
-## OLS estimates for alpha (Intercep) and beta (the coefficient for Invoices)
-fit
-```
-Estimated equation
-
-
-$$
-\hat{E}(y) = \hat{y}^{OLS} = 0.64 + 0.011 x
-$$
-
 
 ```{r}
 ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
   geom_point() +
-  geom_hline(yintercept = 2.110) +
-  geom_abline(intercept = 0.1, slope = 0.015, colour = "steelblue2") + 
-  geom_abline(intercept = 0.64, slope = 0.011, colour = "firebrick")
+  geom_abline(intercept = 0.6, slope = 0.015, colour = "steelblue2") +
+  geom_abline(intercept = 0.3, slope = 0.02, colour = "steelblue2", alpha = 0.5) +
+  geom_abline(intercept = 0.6, slope = 0.010, colour = "steelblue2", alpha = 0.5) +
+  geom_abline(intercept = 2, slope = 0.015, colour = "firebrick")
 ```
 
+
+$$
+y_i - \hat{y_i} \text{ residual for day } i
+$$
+$$
+y_i = \alpha + \beta x_i + e_i\\
+E(y_i) = \alpha + \beta x_i
+$$
+Find guesses for $\alpha$ and $\beta$ based on the data, so that the distance between
+the predictions and the observations is as small as possible. Let's call our
+"guesses" for $\alpha$ $\hat{\alpha}$ and for $\beta$ $\hat{\beta}$
+
+$$
+\hat{y}_i = \hat{E}(y_i) = \hat{\alpha} + \hat{\beta}x_i \text{ guessed expected value}\\
+(\hat{\alpha}^{OLS}, \hat{\beta}^{OLS}) = \min_{\hat{\alpha}, \hat{\beta}} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2
+$$
+
+The result of this minimisation is what we call the OLS (ordinary least squares) estimator for $\alpha$ and for $\beta$.
+
+## Application in R
+
+```{r}
+## lm: linear model
+lm(Time ~ 1 + Invoices, data = invoices)
+```
+
+Estimated equation using OLS.
+$$
+\hat{y}_i =  0.64 + 0.012 x_i
+$$
+We estimate the expected processing time at $x_i$ invoice to be the sum the estimated fixed costs (0.64 hours) plus the estimated marginal costs (0.012 hours/invoice) times the number of invoices ($x_i$).
+
+$$
+\hat{y} =  0.64 + 0.012 x
+$$
+
+The expected processing time increases by 0.012 *hours* for each additional invoice.
+
+The expected processing time at zero invoices is 0.64 _hours_.
+
+## Plot the OLS estimated line
+
+```{r}
+ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
+  geom_point() +
+  geom_abline(intercept = 0.1, slope = 0.015, colour = "steelblue2") +
+  geom_abline(intercept = 0.64, slope = 0.012, colour = "firebrick")
+```
 ```{r}
 ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
   geom_point() +
   geom_smooth(method = "lm")
 ```
-
-
-## Plot the OLS estimated line
-
-```{r}
-## Calculate the predicted y using the OLS estimates (guesses) for alpha and beta
-invoices <- invoices %>%
-  mutate(
-    y_OLS = 0.64 + 0.011 * Invoices
-  )
-```
-
-
-
-
-<!-- ```{r} -->
-<!-- ggplot(data = invoices, aes(x = Invoices, y = Time)) + -->
-<!--   geom_point(size = 2, shape = 1) + -->
-<!--   geom_segment( -->
-<!--     aes(xend = Invoices, yend = Est_mean), -->
-<!--     size = 1 / 4 -->
-<!--   ) + -->
-<!--   geom_line(aes(y = Est_mean)) -->
-<!-- ``` -->
 
 $$
 y_i = \underbrace{\alpha + \beta x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation, stochastic (random) part}}, \quad i = 1,\ldots,n
