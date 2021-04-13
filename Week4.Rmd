@@ -83,6 +83,7 @@ y_i  = \underbrace{0.1 + 0.015x_i}_{\text{line, systematic part}} + \underbrace{
 $$
 
 
+
 ```{r}
 x <- 190 ## Number of invoices
 e <- runif(1, min = -1, max = 1) ## Uniform distribution on [-1, 1]
@@ -118,6 +119,7 @@ $$
 \hat{y}_i = 0.1 + 0.015x_i
 $$
 
+
 ```{r}
 ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
   geom_point() +
@@ -131,10 +133,34 @@ ggplot(data = invoices, aes(x = Invoices, y = Time)) +
 $$
 y_i - \hat{y_i} \text{ residual for day } i
 $$
+```{r}
+## Illustration only
+invoices <- invoices %>%
+  mutate(
+    y_predicted_1 = 0.1 + 0.015 * Invoices
+  )
+
+ggplot(data = invoices, aes(x = Invoices, y = Time)) +
+  geom_point(size = 2) +
+  geom_segment(
+    aes(xend = Invoices, yend = y_predicted_1),
+    size = 1 / 4
+  ) +
+  geom_abline(intercept = 0.1, slope = 0.015, color = "steelblue")
+```
+How to aggregate each individual deviation (residual)? One possible approach is to simply sum the deviations
+
+$$
+\sum_{i = 1}^{n} (y_i - \hat{y}_i)^2
+$$
+
+
 $$
 y_i = \alpha + \beta x_i + e_i\\
 E(y_i) = \alpha + \beta x_i
 $$
+
+
 Find guesses for $\alpha$ and $\beta$ based on the data, so that the distance between
 the predictions and the observations is as small as possible. Let's call our
 "guesses" for $\alpha$ $\hat{\alpha}$ and for $\beta$ $\hat{\beta}$
@@ -148,22 +174,25 @@ The result of this minimisation is what we call the OLS (ordinary least squares)
 
 ## Application in R
 
+$$
+\underbrace{y_i}_{Time} = \alpha + \beta \underbrace{x_i}_{Invoices} + e_i
+$$
+
 ```{r}
 ## lm: linear model
 lm(Time ~ 1 + Invoices, data = invoices)
 ```
 
 Estimated equation using OLS.
-$$
-\hat{y}_i =  0.64 + 0.012 x_i
-$$
-We estimate the expected processing time at $x_i$ invoice to be the sum the estimated fixed costs (0.64 hours) plus the estimated marginal costs (0.012 hours/invoice) times the number of invoices ($x_i$).
 
 $$
-\hat{y} =  0.64 + 0.012 x
+\hat{\alpha} = 0.64\\
+\hat{\beta} = 0.011\\
+\hat{y}_i =  0.64 + 0.011 x_i
 $$
+We estimate the expected processing time at $x_i$ invoice to be the sum the estimated fixed costs (0.64 hours) plus the estimated marginal costs (0.011 hours/invoice) times the number of invoices ($x_i$).
 
-The expected processing time increases by 0.012 *hours* for each additional invoice.
+The expected processing time increases by 0.011 *hours* for each additional invoice.
 
 The expected processing time at zero invoices is 0.64 _hours_.
 
@@ -172,151 +201,12 @@ The expected processing time at zero invoices is 0.64 _hours_.
 ```{r}
 ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
   geom_point() +
-  geom_abline(intercept = 0.1, slope = 0.015, colour = "steelblue2") +
-  geom_abline(intercept = 0.64, slope = 0.012, colour = "firebrick")
+  geom_abline(intercept = 0.1, slope = 0.015, colour = "steelblue2") + 
+  geom_abline(intercept = 0.64, slope = 0.011, colour = "firebrick")
 ```
+
 ```{r}
 ggplot(data = invoices, aes(x = Invoices, y = Time)) + 
   geom_point() +
   geom_smooth(method = "lm")
-```
-
-$$
-y_i = \underbrace{\alpha + \beta x_i}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{deviation, stochastic (random) part}}, \quad i = 1,\ldots,n
-$$
-
-
-$$
-x = 120 \\
-y_i = \underbrace{\alpha + \beta 120}_{\text{line, systematic part}} + \underbrace{e_i}_{\text{result of a dice}}, \quad i = 1,\ldots,n
-$$
-```{r}
-mean(runif(1000, min = -1, max = 1))
-```
-
-Assume that $e_i$ are zero on average.
-
-$$
-E(e_i) = 0\\
-$$
-$$
-E(y_i) = E(\alpha + \beta x_i + e_i) = \\
-\underbrace{E(\alpha + \beta x_i)}_{\alpha + \beta x_i} + \underbrace{E(e_i)}_{0} \implies\\
-E(y_i) = \alpha + \beta x_i
-$$
-
-
-
-
-
-
-
-
-$$
-y_i [\text{hours}] = 0.1[\text{hours}] + \underbrace{
-0.015\left[\frac{\text{hours}}{\text{invoice}}\right] x_i [\text{number of invoices}]}_{\text{hours}},
-\quad i = 1,\ldots,n
-$$
-Predictions using this equation:
-
-$$
-\hat{y}_{x = 120} = 0.1 + 0.015 \times 120 = 1.9 \text{ hours}
-$$
-
-$$
-\underbrace{y}_{\text{costs in terms of time}} = \\ 
-\underbrace{0.1}_{\text{fixed costs}} + \\
-\underbrace{0.015}_{\text{marginal costs}}\\ \underbrace{x}_{\text{number of invoices (work)}}
-$$
-
-$$
-y_i = \underbrace{\alpha + \beta x_i}_{\text{line: systematic part}} + \underbrace{e_i}_{\text{deviation from the line: stochastic (random) part}}
-$$
-
-Assume that the $e_i$ are random (like dice throw). Assume that the deviations are zero on average.
-
-$$
-E(e_i) = 0 \text{ expected value of } e_i \text{ equals zero}
-$$
-$$
-E(y_i) = E(\alpha + \beta x_i + e_i) = \\
-\alpha + \beta x_i + E(e_i) = \\
-E(y_i) = \underbrace{\alpha + \beta x_i}_{line} \text{ the expected processing time}
-$$
-Next time: ordinary least squares estimator
-
-
-
-```{r}
-tmp <- lm(Time ~ Invoices, data = invoices)
-summary(tmp)
-r <- residuals(tmp)
-sqrt(var(r) * (29 / (30 - 2)))
-```
-
-
-<!-- Strategy 1: use the observed value for 120 invoices (2.5 h) as a prediction -->
-<!-- Strategy 2: use the (daily) average processing time (this will overestimate low work loads (low number of invoices) and will underestimate high work loads, because there is an increasing  -->
-<!-- pattern in the data: high work loads are associated with longer work time). -->
-
-<!-- Strategy 3: use the average time to process one invoice? -->
-
-
-
-<!-- $$ -->
-<!-- y_i = \alpha + \beta x_i, \quad i = 1,\ldots,n\\ -->
-<!-- \alpha = 0, \beta = 0.015\\ -->
-<!-- y_i = 0 + 0.015 x_i \text{ (blue line)} -->
-<!-- $$ -->
-<!-- $$ -->
-<!-- \text{Estimated time to process 120 invoices}\\ -->
-<!-- \hat{y}_{x = 120} = 0 + 0.015 \times 120 = 1.8 \text{ hours} -->
-<!-- $$ -->
-
-<!-- $$ -->
-<!-- y_i = \underbrace{\alpha + \beta x_i}_{\text{line/systematic part}} + \underbrace{e_i}_{\text{deviation from the line, stochastic (random) part}} -->
-<!-- $$ -->
-<!-- Assumptions about $e_i$, we assume that the deviations are zero on average. -->
-
-<!-- $$ -->
-<!-- E(e_i) = 0 \text{ zero on average} -->
-<!-- $$ -->
-<!-- $$ -->
-<!-- \hat{y} = \alpha + \beta x -->
-<!-- $$ -->
-
-<!-- ## OLS estimator -->
-
-<!-- Usd the *O*rdinary *L*east *S*quares estimator to find "guesses" for alpha and beta. -->
-
-<!-- ```{r} -->
-<!-- ## lm: linear model -->
-<!-- fit <- lm(Time ~ 1 + Invoices, data = invoices) -->
-<!-- fit -->
-<!-- ``` -->
-
-<!-- $$ -->
-<!-- \hat{\alpha} = 0.64 {\text{ OLS guess for } \alpha }\\ -->
-<!-- \hat{\beta} = 0.011 {\text{ OLS guess for } \beta} \\ -->
-<!-- \hat{y} = \hat{\alpha} + \hat{\beta}x\\ -->
-<!-- \hat{y} = 0.64 + 0.011x \text{ OLS guess for the equation}\\ -->
-<!-- \hat{y}_{x = 120} = 0.64 + 0.011 \times 120 = 1.96 \text{ hours} -->
-<!-- $$ -->
-<!-- $$ -->
-
-<!-- y_i [\text{hours}] = \alpha [\text{hours}] + \beta\left[\frac{\text{hours}}{\text{invoice}}\right] x_i [\text{Number of invoices}] + e_i [\text{hours}] -->
-<!-- $$ -->
-
-## Residuals
-
-```{r}
-invoices$Est_mean <- predict(lm(Time ~ Invoices, data = invoices))
-invoices %>%
-  ggplot(aes(x = Invoices, y = Time)) +
-  geom_point(size = 2, shape = 1) +
-  geom_segment(
-    aes(xend = Invoices, yend = Est_mean),
-    size = 1 / 4
-  ) +
-  geom_line(aes(y = Est_mean))
 ```
