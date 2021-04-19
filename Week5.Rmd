@@ -1,0 +1,20 @@
+---
+title: "Week 5"
+author: "Boyko Amarov"
+date: "4/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv")
+```
+
+## Linear regression model with a single categorical predictor
+
+
+Variables description:
+
+
+- `kid_score`: (numeric) Kid’s IQ score.
+- `mom_hs` (binary): 1 if the mother has finished high school, 0 otherwise.
