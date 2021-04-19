@@ -1,0 +1,18 @@
+---
+title: "Week 5"
+author: "Boyko Amarov"
+date: "4/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv") %>% select(kid_score, mom_hs)
+```
+
+## Lineares Regressionsmodell mit einem kategoriallen Prädiktor 
+
+Variablenbeschreibung:
+
+- `kid_score`: (numeric) Punkte vom IQ Test.
+- `mom_hs` (binary): 1 Mutter hat Abitur, 0 Mutter hat keine Abitur
