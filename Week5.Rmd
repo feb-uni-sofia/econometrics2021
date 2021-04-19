@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv")
+kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv") %>% select(kid_score, mom_hs)
 ```
 
 ## Linear regression model with a single categorical predictor
@@ -18,3 +18,100 @@ Variables description:
 
 - `kid_score`: (numeric) Kid’s IQ score.
 - `mom_hs` (binary): 1 if the mother has finished high school, 0 otherwise.
+
+
+Two groups of kids: the ones whose mother had a high school (`mom_hs = 1`) degree and the rest (`mom_hs = 0`).
+
+Question: are this two groups different with respect to IQ (as measured by `kid_score`).
+
+
+## Summarise the data
+
+```{r}
+summary(kids$kid_score)
+```
+```{r}
+table(kids$mom_hs)
+```
+
+```{r}
+## select only the observations (kids) whose mother had a high school degree
+## == (logical comparison)
+kids_mom_nohs <- kids %>% filter(mom_hs == 0)
+kids_mom_hs <- kids %>% filter(mom_hs == 1)
+```
+
+```{r}
+print("Kids with mothers without high school degree")
+summary(kids_mom_nohs$kid_score)
+print("Kids with mothers with high school degree")
+summary(kids_mom_hs$kid_score)
+```
+```{r}
+ggplot(data = kids, aes(x = mom_hs, y = kid_score, color = factor(mom_hs))) + 
+  geom_point(position = "jitter")
+```
+
+```{r}
+ggplot(data = kids, aes(x = kid_score, y = factor(mom_hs))) + 
+  geom_boxplot()
+```
+
+Assume that the kids were selected at random from the population of all kids in the USA.
+
+
+There are a lot of samples that we could have observed, but we have selected only _one_ sample!
+
+Assumption about all the possible samples. Before that we formalise our comparison between the two groups
+in terms of a linear regression model.
+
+$$
+i = 1,\ldots,n = 434 \text{ kids}\\
+y_i: \text{ IQ score of kid } i\\
+x_i: \text{ mother has high school degree (1) or not (0) for kid } i\\
+$$
+$$
+y_i = \alpha + \beta x_i + e_i\\
+E(y_i) = \alpha + \beta x_i\\
+\begin{align}
+E(y_i) = 
+\begin{cases} 
+\alpha + \beta & \text{if } x_i = 1 \\
+\alpha& \text{if } x_i = 0
+\end{cases}   
+\end{align}
+$$
+
+
+In the linear model $\alpha$ is the the expected IQ score of kids with mother without high school degree. The expected IQ score of kids with mother with HS degree is $\alpha + \beta$.
+
+$$
+\begin{align}
+E(y_i) = 
+\begin{cases} 
+\mu_1 = \alpha + \beta & \text{if } x_i = 1 \\
+\mu_0 =\alpha & \text{if } x_i = 0
+\end{cases}   
+\end{align}
+$$
+
+$$
+\mu_1 = \alpha + \beta\\
+\mu_0 =\alpha\\
+\implies \beta = \mu_1 - \mu_0
+$$
+$\beta$ is the difference between expected IQ scores of kids in the first group (mother has HS degree) and expected IQ score of kids in the second group (kids with mother without HS degree).
+
+## Coefficient estimation
+
+
+```{r}
+lm(kid_score ~ 1 + mom_hs, data = kids)
+```
+Estimated regression equation
+$$
+\hat{y}_i = 77.55 + 11.77x_i
+$$
+
+
+
