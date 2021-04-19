@@ -9,7 +9,6 @@ output: html_document
 
 ` (back trick)
 
-
 ```{r, setup, message=FALSE}
 ## Load packages
 library(tidyverse)
@@ -50,6 +49,12 @@ Ungefähr die Hälfte der Personen hatte Größe, die kleiner war als 66 inch (M
 1. Lage (Location) (Mittlere Gerade im Boxplot)
 2. Streuung (Spread)
 
+```{r}
+ggplot(data = earnings, aes(x = height)) + geom_boxplot()
+```
+
+
+Das Boxplot-Diagram ist nützlich, wenn wir verschiedene Gruppen vergleichen, z.B. männlich/weiblich.
 
 ```{r}
 ggplot(data = earnings, aes(x = height, y  = factor(male))) + geom_boxplot()

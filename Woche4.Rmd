@@ -117,7 +117,14 @@ ggplot(data = invoices, aes(x = Invoices, y = Time)) +
     aes(xend = Invoices, yend = y_predicted_1),
     size = 1 / 4
   ) +
-  geom_line(aes(y = y_predicted_1), color = "steelblue2")
+  geom_line(aes(y = y_predicted_1), color = "steelblue2") +
+  geom_abline(intercept = 0.64171, slope = 0.01129, color = "firebrick")
+```
+
+```{r}
+ggplot(data = invoices, aes(x = Invoices, y = Time)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm")
 ```
 
 Differenz zwischen beobachteter Bearbeitungszeit und erwarteter Bearbeitungszeit.
