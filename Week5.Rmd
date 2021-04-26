@@ -295,15 +295,32 @@ d <- data.frame(
     y = dnorm(x, mean = 0, sd = 1)
   )
 
-std_norm_plot <- d %>% 
+d <- data.frame(
+  x = seq(-5, 5, length.out = 200)
+) %>%
+  mutate(
+    ## Dnorm computes the density
+    y = dnorm(x, mean = 0, sd = 1)
+  )
+
+## Code for illustration only
+d %>%
   ggplot(aes(x = x)) +
   # note this next line is the only difference in code from the last plot
-  geom_ribbon(
-    data = d %>% filter(x > -1, x < 1),
-    aes(ymin = 0, ymax = y), fill = "gray"
-  ) +
+  geom_ribbon(data = d %>% filter(x > -1, x < 1),
+              aes(ymin = 0, ymax = y), fill = "gray") +
   geom_line(aes(y = y)) +
-  annotate(geom = "text", x = 0, y = 0.2, label = expression("p" %~~% "0.682")) +
+  annotate(
+    geom = "text",
+    x = 0,
+    y = 0.2,
+    label = substitute(
+      "p" %~~% p,
+      list(
+        p = round(pnorm(1) - pnorm(-1), 2)
+      )
+    )
+  ) +
   labs(
     x = "x",
     y = "Normal density"
@@ -366,39 +383,6 @@ std_norm_plot +
 ```{r}
 table(norm_sim$x_in_interval)
 ```
-
-<!-- ```{r} -->
-<!-- d <- data.frame( -->
-<!--   x = seq(-5, 5, length.out = 200) -->
-<!-- ) %>% -->
-<!--   mutate( -->
-<!--     ## Dnorm computes the density  -->
-<!--     y = dnorm(x, mean = 0, sd = 1) -->
-<!--   ) -->
-
-<!-- ## Code for illustration only -->
-<!-- d %>%  -->
-<!--   ggplot(aes(x = x)) + -->
-<!--   # note this next line is the only difference in code from the last plot -->
-<!--   geom_ribbon(data = d %>% filter(x > -1, x < 1), -->
-<!--               aes(ymin = 0, ymax = y), fill = "gray") + -->
-<!--   geom_line(aes(y = y)) + -->
-<!--   annotate( -->
-<!--     geom = "text",  -->
-<!--     x = 0,  -->
-<!--     y = 0.2,  -->
-<!--     label = substitute( -->
-<!--       "Area" %~~% p, -->
-<!--       list( -->
-<!--         p = round(pnorm(1) - pnorm(-1), 2) -->
-<!--       ) -->
-<!--     ) -->
-<!--   ) + -->
-<!--   labs( -->
-<!--     x = "x", -->
-<!--     y = "Normal density" -->
-<!--   ) -->
-<!-- ``` -->
 
 ```{r}
 ## Nur zur Illustration
