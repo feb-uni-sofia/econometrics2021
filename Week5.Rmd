@@ -7,6 +7,9 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(broom)
+## install.packages("broom")
+
 kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv") %>% select(kid_score, mom_hs)
 ```
 
@@ -197,7 +200,7 @@ d <- data.frame(
   )
 
 ## Code for illustration only
-d %>%
+std_norm_plot <- d %>%
   ggplot(aes(x = x)) +
   # note this next line is the only difference in code from the last plot
   geom_ribbon(data = d %>% filter(x > -1, x < 1),
