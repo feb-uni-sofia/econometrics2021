@@ -154,7 +154,7 @@ Plot of the density function (preparing the data)
 ```{r}
 norm_df <- expand_grid(
   x = seq(-5, 5, length.out = 300),
-  mu = c(0, 1),
+  mu = c(0, 2),
   sigma = c(1, 2)
 ) %>%
   mutate(
@@ -167,8 +167,9 @@ Plotting the density
 ```{r}
 norm_df %>%
   ggplot(aes(x = x, y = y, colour = factor(mu), lty = factor(sigma))) +
-  geom_line()
-
+  geom_line() + 
+  geom_vline(xintercept = c(0, 2), lty = 2)
+  
 ## lty: line type
 ```
 
@@ -178,8 +179,6 @@ norm_df %>%
 <!-- The area under the density over an interval equals the probability of an event occurring in the interval. -->
 
 <!-- We take the standard normal distribution N(0, 1) and want to compute the probability of x occurring between -1 and 1. -->
-
-
 
 
 ```{r}
@@ -211,7 +210,7 @@ std_norm_plot <- d %>%
     x = 0,
     y = 0.2,
     label = substitute(
-      "p" %~~% p,
+      "Probability" %~~% p,
       list(
         p = round(pnorm(1) - pnorm(-1), 2)
       )
@@ -222,7 +221,8 @@ std_norm_plot <- d %>%
     y = "Normal density"
   ) +
   geom_vline(xintercept = -1, lty = 2) + 
-  geom_vline(xintercept = 1, lty = 2)
+  geom_vline(xintercept = 1, lty = 2) +
+  scale_x_continuous(breaks = c(-5, -1, 0, 1, 5))
 
 plot(std_norm_plot)
 ```
@@ -235,8 +235,6 @@ pnorm(-1, mean = 0, sd = 1)
 $$
 P(x < -1|\mu = 0, \sigma = 1) = 0.1586553
 $$
-
-
 ```{r}
 ## p(probability)norm(normal distribution)
 pnorm(1, mean = 0, sd = 1)
@@ -245,23 +243,26 @@ pnorm(1, mean = 0, sd = 1)
 $$
 P(x < 1|\mu = 0, \sigma = 1) = 0.8413447
 $$
+
+
+
+
+
+
 $$
 P(-1 < x < 1|\mu = 0, \sigma = 1) = P(x < 1|\mu = 0, \sigma = 1) - P(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
 $$
-
-Wir spielen das Spiel beschrieben duch die Standardnormalverteilung 100 Mal.
+Play a standard normal "game" 100 times.
 
 ```{r}
-set.seed(123249)
-
 ## r(random/zufällig)norm(normal distribution)
 norm_sim <- data.frame(
-  ## Ziehe 100 Werte aus der Standardnormalverteilung
+  ## Draw 100 values from the standard normal distribution at random
   x = rnorm(100, mean = 0, sd = 1)
 ) %>%
   mutate(
-    ## &: logisches UND
-    x_in_interval = x < 1 & x > -1
+    ## &: logical AND
+    x_in_interval = x > -1 & x < 1
   )
 
 ## Code for illustration only
@@ -295,20 +296,28 @@ d %>%
     label = substitute(
       "p" %~~% p,
       list(
-        p = round(1 - pnorm(1.964), 3)
+        p = round(1 - pnorm(2), 3)
         )
       )
     ) +
   labs(
     x = "x",
     y = "Normal density"
-  )
+  ) + 
+  scale_x_continuous(breaks = c(-5, -2, 0, 2, 5))
 ```
-$$
-P(x > 1.96|\mu = 0, \sigma = 1) = 1 - P(x < 1.96|\mu = 0, \sigma = 1) = 1 - pnorm(1.96, mean = 0, sd = 1)
-$$
+
 ```{r}
-1 - pnorm(1.96, mean = 0, sd = 1)
+pnorm(2, mean = 0, sd = 1)
+```
+
+
+$$
+P(x > 2|\mu = 0, \sigma = 1) = 1 - P(x < 2|\mu = 0, \sigma = 1) = 1 - pnorm(2, mean = 0, sd = 1)
+$$
+
+```{r}
+1 - pnorm(2, mean = 0, sd = 1)
 ```
 
 
@@ -332,14 +341,17 @@ d %>%
        y = "Normal density")
 ```
 
-## Simulation
+## Samples simulation
 
 $$
 y_i = \alpha + \beta x_i + e_i\\
 \text{Assume } e_i \sim N(0, \sigma^2)
 $$
 
-1. Stichproben simulieren
+Assume that we know the function that describes the population of children.
+$$
+y_i = 77.55 + 11.77 x_i + e_i
+$$
 
 Let us assume that the $e_i$ term follows a normal distribution with mean zero and standard deviation $\sigma$.
 
@@ -347,11 +359,12 @@ Let us assume that the $e_i$ term follows a normal distribution with mean zero a
 ```{r}
 ## Do the same calculation of the group averages that
 ## we accomplished by splitting the data in two using `filter`.
+
 kids %>% 
   group_by(mom_hs) %>%
   summarise(
-    "Anzahl von Kindern" = n(),
-    "Mittelwert" = mean(kid_score)
+    "Group size" = n(),
+    "Average" = mean(kid_score)
   )
 
 ## Estimate the standard deviation of the IQ scores (for all groups)
@@ -363,14 +376,14 @@ sd(kids$kid_score)
 ## Construct a data set with mom_hs repeated R = 2000 times
 ## 
 sim_df <- expand_grid(
-    R = 1:10,
+    R = 1:2000,
     mom_hs = kids$mom_hs
   ) %>%
   mutate(
     ## Compute a simulated IQ score for each kid according to our estimated regression equation
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 20.41 (that we estimated from the sample)
-    kid_score = 77.54839 + (89.31965 - 77.54839) * mom_hs + rnorm(10 * 434, mean = 0, sd = 20.41069)
+    kid_score = 77.54839 + 11.77 * mom_hs + rnorm(2000 * 434, mean = 0, sd = 20.41069)
   )
 ```
 
