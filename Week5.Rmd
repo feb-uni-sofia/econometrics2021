@@ -369,12 +369,10 @@ $$
 Assume that we know the function that describes the population of children is:
 
 $$
-\begin{align}
-  y_i = 77.55 + 11.77 x_i + e_i   \label{eq:pop-reg}
-\end{align}
+  y_i = 77.55 + 11.77 x_i + e_i
 $$
 
-We would like to study the way the estimates for $\alpha$ and $\beta$ vary from sample to sample. For that purpose we will generate $R = 2000$ samples from the population described by \ref{eq:pop-reg}. The we will estimate the regression model for each of these 2000 samples. What follows is a lot of rather technical details that
+We would like to study the way the estimates for $\alpha$ and $\beta$ vary from sample to sample. For that purpose we will generate $R = 2000$ samples from the population described by the equation above. The we will estimate the regression model for each of these 2000 samples. What follows is a lot of rather technical details that
 we need to generate the values for the samples and arrange these values in a way that is convenient for plotting and analysis.
 
 We begin by introducing the `group_by` function and we use it to compute the sample group means for the two groups defined by `mom_hs`.
