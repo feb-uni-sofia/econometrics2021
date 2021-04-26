@@ -438,6 +438,7 @@ sim_coeff %>%
   ggplot(aes(x = estimate)) + 
   geom_density()
 ```
+
 Here we use the `summarise_all` function to compute the mean for every variable in the simulation dataset, grouping it by term (remember, we have two terms in the output: the coefficients $\hat{\alpha}$ and $\hat{\beta}$).
 ```{r}
 ## Compute the mean of each column by coefficient
