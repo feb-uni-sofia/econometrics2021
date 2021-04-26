@@ -2,18 +2,24 @@
 title: "Week 5"
 author: "Boyko Amarov"
 date: "4/19/2021"
-output: html_document
+output:
+  bookdown::html_document2: default
 ---
 
 ```{r setup, include=FALSE}
+## Warning: to compile the notes you need the bookdown and broom packages. Install them by
+## running install.packages("bookdown") and install.packages("broom"), see the commented
+## lines below
+
 library(tidyverse)
 library(broom)
+## install.packages("bookdown")
 ## install.packages("broom")
 
 kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv") %>% select(kid_score, mom_hs)
 ```
 
-## Linear regression model with a single categorical predictor
+# Linear regression model with a single categorical predictor
 
 
 Variables description:
@@ -122,10 +128,10 @@ $$
 \hat{y}_i = \underbrace{77.55}_{\text{sample average of the x = 0 group}} + \underbrace{11.77}_{89.32 - 77.55: \text{difference between the group sample averages}}x_i\\
 $$
 
-## Normal distribution
+# Normal distribution
 
 
-### Definition of the normal distribution density
+## Definition of the normal distribution density
 
 The density function of the normal distribution is given by:
 $$
@@ -136,7 +142,7 @@ $$
 We write $N(\mu, \sigma^2)$ to refer to this distribution. The normal distribution has two parameters: $\mu$ and $\sigma$. It can be shown that $\mu$ is the expected value of the distribution and that $\sigma^2$ is the variance of the distribution.
 
 
-### Calculate the density (dnorm)
+## Calculate the density (dnorm)
 
 ```{r}
 ## d(density)norm(normal distribution)
@@ -189,7 +195,7 @@ norm_df %>%
 ## lty: line type
 ```
 
-### Computing probabilities
+## Computing probabilities
 
 
 <!-- The area under the density over an interval equals the probability of an event occurring in the interval. -->
@@ -369,13 +375,16 @@ $$
 Assume that we know the function that describes the population of children is:
 
 $$
+\begin{align}
+  (\#eq:reg-pop)
   y_i = 77.55 + 11.77 x_i + e_i
+\end{align}
 $$
 
-We would like to study the way the estimates for $\alpha$ and $\beta$ vary from sample to sample. For that purpose we will generate $R = 2000$ samples from the population described by the equation above. The we will estimate the regression model for each of these 2000 samples. What follows is a lot of rather technical details that
+We would like to study the way the estimates for $\alpha$ and $\beta$ vary from sample to sample. For that purpose we will generate $R = 2000$ samples from the population described by equation \@ref(eq:reg-pop). The we will estimate the regression model for each of these 2000 samples. What follows is a lot of rather technical details that
 we need to generate the values for the samples and arrange these values in a way that is convenient for plotting and analysis.
 
-We begin by introducing the `group_by` function and we use it to compute the sample group means for the two groups defined by `mom_hs`.
+We begin by introducing the `group_by` function and we'll use it to compute the sample group means for the two groups defined by `mom_hs`.
 
 ```{r}
 ## Do the same calculation of the group averages that
@@ -434,7 +443,7 @@ sim_coeff <- sim_df %>%
   do(tidy(lm(kid_score ~ mom_hs, data = .)))
 ```
 
-The data set `sim_coeff` now contains estimated coefficients ($\hat{\alpha}}$ and $\hat{\beta}}$) for every sample. To plot the distribution of $\hat{\beta}}$ we filter the data set so that we keep only the raw where `term == "mom_hs"` (i.e our estimates for $\beta$).
+The data set `sim_coeff` now contains estimated coefficients ($\hat{\alpha}$ and $\hat{\beta}$) for every sample. To plot the distribution of $\hat{\beta}}$ we filter the data set so that we keep only the raw where `term == "mom_hs"` (i.e our estimates for $\beta$).
 
 ```{r}
 sim_coeff %>%
