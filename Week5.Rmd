@@ -272,7 +272,10 @@ $$
 
 
 $$
+\begin{align}
+(\#eq:prob-center)
 P(-1 < x < 1|\mu = 0, \sigma = 1) = P(x < 1|\mu = 0, \sigma = 1) - P(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
+\end{align}
 $$
 Play a standard normal "game" 100 times.
 
@@ -299,9 +302,13 @@ std_norm_plot +
 #   geom_density(data = norm_sim, color = "steelblue2")
 ```
 
+Count how many games end up with a result between -1 and 1 and compare this count to the probability of the interval computed in equation \@ref(eq:prob-center). Run the code a couple of times and observe how the number of games with result in [-1, 1] changes.
+
 ```{r}
 table(norm_sim$x_in_interval)
 ```
+
+Commonly we need to compute probabilities for events like (x > 2). To compute it using `pnorm` we will make use of the fact that the entire area under the density curve equals 1.
 
 ```{r}
 ## Nur zur Illustration
@@ -329,10 +336,12 @@ d %>%
   scale_x_continuous(breaks = c(-5, -2, 0, 2, 5))
 ```
 
+First, compute the area under the curve for the interval $(-\infty, 2)$
 ```{r}
 pnorm(2, mean = 0, sd = 1)
 ```
 
+The subtract it from 1 to obtain the area under the curve for the interval $(2, \infty)$.
 
 $$
 P(x > 2|\mu = 0, \sigma = 1) = 1 - P(x < 2|\mu = 0, \sigma = 1) = 1 - pnorm(2, mean = 0, sd = 1)
@@ -340,27 +349,6 @@ $$
 
 ```{r}
 1 - pnorm(2, mean = 0, sd = 1)
-```
-
-
-```{r}
-d <- data.frame(
-  x = seq(-5, 5, length.out = 200)
-) %>%
-  mutate(
-    ## Dnorm computes the density 
-    y = dnorm(x, mean = 0, sd = 1)
-  )
-
-d %>% 
-  ggplot(aes(x = x)) +
-  # note this next line is the only difference in code from the last plot
-  geom_ribbon(data = d %>% filter(x > -1, x < 1),
-              aes(ymin = 0, ymax = y), fill = "gray") +
-  geom_line(aes(y = y)) +
-  annotate(geom = "text", x = 0, y = 0.2, label = expression("p" %~~% "??")) +
-  labs(x = "x",
-       y = "Normal density")
 ```
 
 ## Samples simulation
