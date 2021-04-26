@@ -5,7 +5,7 @@ This is the central repository for all exercise class materials.
 The online meetings take place as follows:
 
 1. Mo. 11:00-12:30 (en)
-1. Mo. 13:00-14:30 (de)
+1. Mo. 13:00-14:30 (de) (Skype room [https://join.skype.com/ArC2x0uuJvyT](https://join.skype.com/ArC2x0uuJvyT))
 1. ~~Mo. 15:00-16:30 (en) (Skype room: [https://join.skype.com/e3CXqzEMq93a](https://join.skype.com/e3CXqzEMq93a))~~
 1. Mo. 18:00-19:30 (en)
 1. Tu. 10:00-11:30 (en)
