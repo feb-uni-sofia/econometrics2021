@@ -125,7 +125,7 @@ $$
 ## Normal distribution
 
 
-### Bedeuting der Parameter der Normalverteilung
+### Definition of the normal distribution density
 
 The density function of the normal distribution is given by:
 $$
@@ -149,7 +149,12 @@ dnorm(x = 1, mean = 5, sd = 2)
 ```
 
 
-Plot of the density function (preparing the data)
+## Meaning of the parameters
+
+The expected value ($\mu$) is the location parameter of the distribution. It determines the location of the centre of the distribuion. The variance of the distribution determines the shape of the curve. Small values of $\sigma$ result in curves that are concentrated around the expected value ($\mu$). Large values fo $\sigma$ result in curves that are less concentrated around the expected value.
+
+
+To plot of the density function we first create a data set `norm_df` that holds a sequence of x-values between -5 and 5. We use `expand_grid` so that we obtain every combination between `x`, `mu` and `sigma`. The reason is that it is easier to plot the curves with ggplot when we can map variables in the data set to aesthetics like colour and line type.
 
 ```{r}
 norm_df <- expand_grid(
@@ -162,13 +167,24 @@ norm_df <- expand_grid(
   )
 ```
 
-Plotting the density
-
+Here we use the dataset to `norm_df` to plot the curves of the distribution.
 ```{r}
 norm_df %>%
-  ggplot(aes(x = x, y = y, colour = factor(mu), lty = factor(sigma))) +
+  ggplot(
+    aes(
+      x = x, 
+      y = y, 
+      ## Maps the value of mu to the color of the curve (colour)
+      colour = factor(mu),
+      ## Map the value of sigma to the line type (lty)of the curve
+      lty = factor(sigma)
+    )
+  ) +
   geom_line() + 
-  geom_vline(xintercept = c(0, 2), lty = 2)
+  ## Draws two (dashed) vertical lines at x = 0 and at x = 2
+  geom_vline(xintercept = c(0, 2), lty = 2) +
+  ## Sets the breaks on the x-axis
+  scale_x_continuous(breaks = c(-5, 0, 2, 5))
   
 ## lty: line type
 ```
@@ -343,18 +359,25 @@ d %>%
 
 ## Samples simulation
 
+Let us take the linear regression model and let us _assume_ that the random term $e_i$ follows a normal distribution with zero mean $\mu = 0$ and some standard deviation $\sigma$ (or equivalently variance $\sigma^2$).
+
 $$
 y_i = \alpha + \beta x_i + e_i\\
 \text{Assume } e_i \sim N(0, \sigma^2)
 $$
 
-Assume that we know the function that describes the population of children.
+Assume that we know the function that describes the population of children is:
+
 $$
-y_i = 77.55 + 11.77 x_i + e_i
+\begin{align}
+  y_i = 77.55 + 11.77 x_i + e_i   \label{eq:pop-reg}
+\end{align}
 $$
 
-Let us assume that the $e_i$ term follows a normal distribution with mean zero and standard deviation $\sigma$.
+We would like to study the way the estimates for $\alpha$ and $\beta$ vary from sample to sample. For that purpose we will generate $R = 2000$ samples from the population described by \ref{eq:pop-reg}. The we will estimate the regression model for each of these 2000 samples. What follows is a lot of rather technical details that
+we need to generate the values for the samples and arrange these values in a way that is convenient for plotting and analysis.
 
+We begin by introducing the `group_by` function and we use it to compute the sample group means for the two groups defined by `mom_hs`.
 
 ```{r}
 ## Do the same calculation of the group averages that
@@ -366,19 +389,34 @@ kids %>%
     "Group size" = n(),
     "Average" = mean(kid_score)
   )
+```
 
+Next we calculate the _sample_ standard deviation of the IQ test scores (`kid_score`) and for now we will use this value for the standard deviation of the random terms $e_i$.
+
+```{r}
 ## Estimate the standard deviation of the IQ scores (for all groups)
 ## so that we can base our simulation on a plausible value
 sd(kids$kid_score)
+```
 
+
+Next we construct a data set using `expand_grid` to replicate the `mom_hs` column $R = 2000$ times.
+
+```{r}
 ## Number of simulated samples
 
 ## Construct a data set with mom_hs repeated R = 2000 times
-## 
+## Examine the contents of sim_df to see what expand_grid returns
 sim_df <- expand_grid(
     R = 1:2000,
     mom_hs = kids$mom_hs
-  ) %>%
+  )
+```
+
+After that we calculate the (simulated) IQ score for every child in every sample (a total of $2000 \times 434$ values) by using equation \ref{eq:pop-reg}. For the value of the random term we select a value from the normal distribution with mean 0 and standard deviation $\sigma = 20.41069$ (we will turn to the estimation of $\sigma$ later).
+
+```{r}
+sim_df <- sim_df %>%
   mutate(
     ## Compute a simulated IQ score for each kid according to our estimated regression equation
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
@@ -387,23 +425,7 @@ sim_df <- expand_grid(
   )
 ```
 
-
-Plot the distributions of scores for each simulated sample
-```{r}
-sim_df %>%
-  ggplot(
-    aes(
-      x = kid_score, 
-      group = interaction(R, mom_hs),
-      colour = factor(mom_hs)
-      )
-    ) +
-  geom_density(
-    size = 1/5
-  )
-```
-
-Estimate the regression coefficients from each sample
+The last step completes the simulation of our 2000 samples and we can start estimating the regression model in each sample. For that we group the simulaiton data set `sim_df` by the simulation number (variable $R$) and run the regression model in every group. The `tidy` function servse to transform the output of `lm` into a format that can easily fit into a rectangular table.
 
 ```{r}
 # tidy(lm(kid_score ~ mom_hs, data = kids))
@@ -414,15 +436,15 @@ sim_coeff <- sim_df %>%
   do(tidy(lm(kid_score ~ mom_hs, data = .)))
 ```
 
+The data set `sim_coeff` now contains estimated coefficients ($\hat{\alpha}}$ and $\hat{\beta}}$) for every sample. To plot the distribution of $\hat{\beta}}$ we filter the data set so that we keep only the raw where `term == "mom_hs"` (i.e our estimates for $\beta$).
 
-Plot the simulated distribution of the beta coefficient (difference between the group sample averages).
 ```{r}
 sim_coeff %>%
   filter(term == "mom_hs") %>%
   ggplot(aes(x = estimate)) + 
   geom_density()
 ```
-
+Here we use the `summarise_all` function to compute the mean for every variable in the simulation dataset, grouping it by term (remember, we have two terms in the output: the coefficients $\hat{\alpha}$ and $\hat{\beta}$).
 ```{r}
 ## Compute the mean of each column by coefficient
 sim_coeff %>%
@@ -430,7 +452,8 @@ sim_coeff %>%
   summarise_all(mean)
 ```
 
-Estimated regression equations for each simulated sample
+
+Next we would like to visualise the estimated regression lines for each sample. It is easier if we transform the dataset with the estimated coefficients for each sample are in separate columns. For now we are only interested in the `estimate` variable, so for the sake of simplicity we omit rest of the variables (this is the purpose of the `select` function). The we transform the data set from a long format.
 
 ```{r}
 sim_coeff_wide <- sim_coeff %>%
@@ -438,12 +461,13 @@ sim_coeff_wide <- sim_coeff %>%
     ## Rename the terms to get easier variable names
     term = ifelse(term == "(Intercept)", "alpha", "beta")
   ) %>%
+  ## Keep only the R, term and estimate variables
   select(R, term, estimate) %>%
   ## Pivot the data set so that we have the estimated coefficients as columns
   pivot_wider(names_from = "term", values_from = "estimate")
 ```
 
-Draw the straight lines estimated for each simulated sample.
+Finally we can plot the regression lines for each sample.
 
 ```{r}
 sim_coeff_wide %>%
@@ -453,22 +477,21 @@ sim_coeff_wide %>%
     ## Set the limits of x-axis
     xlim(c(0, 1)) +
     ## Set the limits of y-axis
-    ylim(c(0, 140))
+    ylim(c(65, 95))
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- Plot the distributions of scores for each simulated sample -->
+<!-- ```{r} -->
+<!-- sim_df %>% -->
+<!--   filter(R < 50) %>% -->
+<!--   ggplot( -->
+<!--     aes( -->
+<!--       x = kid_score,  -->
+<!--       group = interaction(R, mom_hs), -->
+<!--       colour = factor(mom_hs) -->
+<!--       ) -->
+<!--     ) + -->
+<!--   geom_density( -->
+<!--     size = 1/5 -->
+<!--   ) -->
+<!-- ``` -->
