@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(broom)
+## install.packages("broom")
 kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv") %>% select(kid_score, mom_hs)
 ```
 
@@ -16,3 +18,448 @@ Variablenbeschreibung:
 
 - `kid_score`: (numeric) Punkte vom IQ Test.
 - `mom_hs` (binary): 1 Mutter hat Abitur, 0 Mutter hat keine Abitur
+
+Frage:
+Gibt es Unterschiede zwischen den Intelligenztestergebnissen von Kindern mit Müttern mit/ohne Abitur.
+
+Vorschlag: wir spalten den Datensatz nach Gruppenzugehörigkeit (mit/ohne Abitur) und vergleichen die Gruppen 
+z.B. anhand des Mittelwertes der Testergebnisse.
+
+
+```{r}
+## == (logischer Vergleich)
+kids_mom_nohs <- kids %>% filter(mom_hs == 0)
+kids_mom_hs <- kids %>% filter(mom_hs == 1)
+```
+
+
+```{r}
+summary(kids_mom_nohs$kid_score)
+summary(kids_mom_hs$kid_score)
+```
+
+```{r}
+# ggplot(data = kids, aes(x = mom_hs, y = kid_score, color = factor(mom_hs))) + 
+#   geom_point(position = "jitter")
+ggplot(data = kids, aes(x = mom_hs, y = kid_score, colour = factor(mom_hs))) +
+  geom_point(position = "jitter") + 
+  labs(
+    x = "Gruppenzugehörigkeit (ohne Abitur/mit Abitur)",
+    y = "Erzielte Punktzahl"
+  )
+```
+
+```{r}
+# ggplot(data = kids, aes(x = mom_hs, y = kid_score, color = factor(mom_hs))) + 
+#   geom_point(position = "jitter")
+ggplot(data = kids, aes(x = mom_hs, y = kid_score, colour = factor(mom_hs))) +
+  geom_point(position = "jitter") + 
+  labs(
+    x = "Gruppenzugehörigkeit (ohne Abitur/mit Abitur)",
+    y = "Erzielte Punktzahl"
+  )
+```
+
+```{r}
+ggplot(data = kids, aes(x = kid_score, y = factor(mom_hs))) + 
+  geom_boxplot()
+```
+
+$$
+i = 1,\ldots,n = 434 \text{ Kinder}\\
+y_i: \text{ Testergebnis von Kind } i\\
+x_i: \text{ Gruppenzugehörigkeit von Kind (1: Mutter mit Abitur/0: Mutter ohne Abitur) } i\\
+$$
+$$
+y_i = \alpha + \beta x_i + e_i, \quad E(e_i) = 0, i = 1,\ldots,n
+$$
+$$
+E(y_i) = \alpha + \beta x_i\\
+\begin{align}
+E(y_i) = 
+\begin{cases} 
+\mu_1 = \alpha + \beta & \text{falls } x_i = 1 \text{ Erwartetes Testergebnis für die Gruppe mit Abitur (der Mutter)} \\
+\mu_0 = \alpha & \text{falls } x_i = 0 \text{ Erwartetes Testergebnis für die Gruppe ohne Abitur (der Mutter)}
+\end{cases}   
+\end{align}\\
+\implies\\
+\beta = \mu_1 - \mu_0
+$$
+$\alpha$ ist einfach das erwartete Testergebnis für die Gruppe ohne Abitur (der Mutter). $\beta$ ist einfach die Differenz zwischen den erwarteten Testergebnissen der zwei Gruppen.
+
+
+```{r}
+lm(kid_score ~ 1 + mom_hs, data = kids)
+```
+
+$$
+\hat{\alpha} = 77.55 \text{ Mitterwert der Testergebnise in der Gruppe ohne Abitur (Mutter)}\\
+\hat{\beta} = 11.77 = 89.32 - 77.55 \text{ Differenz der zwei Gruppenmitterwerte} \\
+\hat{y}_i =  \hat{\alpha} + \hat{\beta} x_i\\
+\hat{y}_i = 77.55 + 11.77 x_i \text{ geschätzte Gleichung}
+$$
+
+Das geschätzte Testergebnis von Kindern (Mutter ohne Abitur, $x = 0$) is gleich 77.55 (Punkte). Das geschätzte Testergebnis von Kindern (Mutter mit Abitur, $x = 1$) is um 11.77 Punkte höher als das erwartete Testregebnis der anderen Groupe (Mutter ohne Abitur, $x = 0$).
+
+$$
+89.32 - 77.55 = 11.77
+$$
+## Normalverteilung
+
+Die Dichtefunktion der Normalverteilung mit Parametern $\mu$ und $\sigma$ ist gegeben durch:
+$$
+f(x) = \frac{1}{\sqrt{\pi \sigma^2}}e^{-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2}, \quad y \in R
+$$
+
+wir schreiben $N(\mu, \sigma^2)$. Die Normalverteilung mit Erwartungswert $\mu = 0$ und Standardabweichung $\sigma = 1$ nennen wir die Standardnormalverteilung N(0, 1).
+
+```{r}
+## d(density)norm(normal distribution)
+## Wert der Dichtefunktion der Normalverteilung mit mu = 0, sigma = 1: N(0, 1)
+?dnorm
+dnorm(x = 0, mean = 0, sd = 1)
+
+## Wert der Dichtefunktion mit mu = 5, sigma = 2: N(0, 4)
+dnorm(x = 1, mean = 5, sd = 2)
+```
+
+
+Visualise the density
+```{r}
+norm_df <- expand_grid(
+  x = seq(-5, 5, length.out = 300),
+  mu = c(0),
+  sd = c(1)
+) %>%
+  mutate(
+    y = dnorm(x, mean = mu, sd = sd)
+  )
+```
+
+Visualise the densitites
+
+```{r}
+norm_df %>%
+  ggplot(aes(x = x, y = y, color = factor(mu), lty = factor(sd))) +
+  geom_line()
+```
+The area under the density over an interval equals the probability of an event occurring in the interval.
+
+We take the standard normal distribution N(0, 1) and want to compute the probability of x occurring between -1 and 1.
+
+```{r}
+## p(probability)norm(normal distribution)
+pnorm(q = -1, mean = 0, sd = 1)
+```
+$$
+P(x < -1|\mu = 0, \sigma = 1) = 0.1586553
+$$
+```{r}
+## p(probability)norm(normal distribution)
+pnorm(q = 1, mean = 0, sd = 1)
+```
+
+$$
+P(x < 1|\mu = 0, \sigma = 1) = 0.8413447
+$$
+$$
+P(-1 < x < 1|\mu = 0, \sigma = 1) = P(x < 1|\mu = 0, \sigma = 1) - P(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
+$$
+
+
+```{r}
+d <- data.frame(
+  x = seq(-5, 5, length.out = 200)
+) %>%
+  mutate(
+    ## Dnorm computes the density 
+    y = dnorm(x, mean = 0, sd = 1)
+  )
+
+std_norm_plot <- d %>% 
+  ggplot(aes(x = x)) +
+  # note this next line is the only difference in code from the last plot
+  geom_ribbon(
+    data = d %>% filter(x > -1, x < 1),
+    aes(ymin = 0, ymax = y), fill = "gray"
+  ) +
+  geom_line(aes(y = y)) +
+  annotate(geom = "text", x = 0, y = 0.2, label = expression("p" %~~% "0.682")) +
+  labs(
+    x = "x",
+    y = "Normal density"
+  )
+
+plot(std_norm_plot)
+```
+Draw 100 values from the N(0, 1) distribution.
+
+```{r}
+set.seed(123249)
+## r(random)norm(normal distribution)
+norm_sim <- data.frame(
+  x = rnorm(100, mean = 0, sd = 1)
+) %>%
+  mutate(
+    ## &: logical AND
+    x_in_interval = x < 1 & x > -1
+  )
+
+
+## Code for illustration only
+std_norm_plot + 
+  geom_point(
+    data = norm_sim, 
+    aes(x = x, y = runif(100, -0.01, 0.01), colour = x_in_interval),
+    size = 1/2,
+    alpha = 1/2
+  )
+# +
+#   geom_density(data = norm_sim, color = "steelblue2")
+```
+
+```{r}
+table(norm_sim$x_in_interval)
+```
+
+
+
+You can compute the probability for an interval using `pnorm`.
+
+```{r}
+pnorm(0, mean = 0, sd = 1)
+```
+
+$$
+P(x < 0|\mu = 0, \sigma = 1) = \text{pnorm}(0, \text{mean} = 0, \text{sd} = 1) = 0.5
+$$
+Count how many of the simulated values are less than zero:
+
+```{r}
+## x < 0 returns a logical vector with TRUE/FALSE values
+## The sum of all these values equals the number of TRUE
+sum(norm_sim$x < 0)
+```
+
+```{r}
+## Probability that x > 0
+1 - pnorm(0, mean = 0, sd = 1)
+sum(norm_sim$x > 0)
+```
+
+```{r}
+## Probability that x > 0 and x < 1
+pnorm(1, mean = 0, sd = 1) - pnorm(0, mean = 0, sd = 1)
+sum(norm_sim$x < 1 & norm_sim$x > 0)
+```
+
+```{r}
+d <- data.frame(
+  x = seq(-5, 5, length.out = 200)
+) %>%
+  mutate(
+    ## Dnorm computes the density 
+    y = dnorm(x, mean = 0, sd = 1)
+  )
+
+## Code for illustration only
+d %>% 
+  ggplot(aes(x = x)) +
+  # note this next line is the only difference in code from the last plot
+  geom_ribbon(data = d %>% filter(x > -1, x < 1),
+              aes(ymin = 0, ymax = y), fill = "gray") +
+  geom_line(aes(y = y)) +
+  annotate(
+    geom = "text", 
+    x = 0, 
+    y = 0.2, 
+    label = substitute(
+      "Area" %~~% p,
+      list(
+        p = round(pnorm(1) - pnorm(-1), 2)
+      )
+    )
+  ) +
+  labs(
+    x = "x",
+    y = "Normal density"
+  )
+```
+
+```{r}
+d %>% 
+  ggplot(aes(x = x)) +
+  # note this next line is the only difference in code from the last plot
+  geom_ribbon(data = d %>% filter(x > 1.96),
+              aes(ymin = 0, ymax = y), fill = "gray") +
+  geom_line(aes(y = y)) +
+  annotate(
+    geom = "text", 
+    x = 3,
+    y = 0.05, 
+    label = substitute(
+      "Area" %~~% p,
+      list(
+        p = round(1 - pnorm(1.964), 3)
+        )
+      )
+    ) +
+  labs(
+    x = "x",
+    y = "Normal density"
+  )
+```
+$$
+P(x > 1.96|\mu = 0, \sigma = 1) = 1 - P(x < 1.96|\mu = 0, \sigma = 1) = 1 - pnorm(1.96, mean = 0, sd = 1)
+$$
+```{r}
+1 - pnorm(1.96, mean = 0, sd = 1)
+```
+
+
+```{r}
+
+d <- data.frame(
+  x = seq(-5, 5, length.out = 200)
+) %>%
+  mutate(
+    ## Dnorm computes the density 
+    y = dnorm(x, mean = 0, sd = 1)
+  )
+
+d %>% 
+  ggplot(aes(x = x)) +
+  # note this next line is the only difference in code from the last plot
+  geom_ribbon(data = d %>% filter(x > -1, x < 1),
+              aes(ymin = 0, ymax = y), fill = "gray") +
+  geom_line(aes(y = y)) +
+  annotate(geom = "text", x = 0, y = 0.2, label = expression("p" %~~% "??")) +
+  labs(x = "x",
+       y = "Normal density")
+```
+
+## Simulation
+
+$$
+y_i = \alpha + \beta x_i + e_i\\
+\text{Assume } e_i \sim N(0, \sigma^2)
+$$
+
+1. Generate 10 possible samples under the assumption of normal disturbances ($e_i$) and holding x fixed.
+
+Let us assume that the $e_i$ term follows a normal distribution with mean zero and standard deviation $\sigma$.
+
+
+```{r}
+## Do the same calculation of the group averages that
+## we accomplished by splitting the data in two using `filter`.
+kids %>% 
+  group_by(mom_hs) %>%
+  summarise(
+    n = n(),
+    mean = mean(kid_score)
+  )
+
+## Estimate the standard deviation of the IQ scores (for all groups)
+## so that we can base our simulation on a plausible value
+sd(kids$kid_score)
+
+## Number of simulated samples
+
+## Construct a data set with mom_hs repeated R = 2000 times
+## 
+sim_df <- expand_grid(
+    R = 1:10,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    ## Compute a simulated IQ score for each kid according to our estimated regression equation
+    ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
+    ## deviation (sigma) = 20.41 (that we estimated from the sample)
+    kid_score = 77.54839 + (89.31965 - 77.54839) * mom_hs + rnorm(10 * 434, mean = 0, sd = 20.41069)
+  )
+```
+Plot the distributions of scores for each simulated sample
+```{r}
+sim_df %>%
+  ggplot(
+    aes(
+      x = kid_score, 
+      group = interaction(R, mom_hs),
+      colour = factor(mom_hs)
+      )
+    ) +
+  geom_density(
+    size = 1/5
+  )
+```
+
+Estimate the regression coefficients from each sample
+
+```{r}
+# tidy(lm(kid_score ~ mom_hs, data = kids))
+
+sim_coeff <- sim_df %>%
+  group_by(R) %>%
+  ## The tidy function reformats the output of lm so that it can fit in a data frame
+  do(tidy(lm(kid_score ~ mom_hs, data = .)))
+```
+
+
+Plot the simulated distribution of the beta coefficient (difference between the group sample averages).
+```{r}
+sim_coeff %>%
+  filter(term == "mom_hs") %>%
+  ggplot(aes(x = estimate)) + 
+  geom_density()
+```
+
+```{r}
+## Compute the mean of each column by coefficient
+sim_coeff %>%
+  group_by(term) %>%
+  summarise_all(mean)
+```
+
+Estimated regression equations for each simulated sample
+
+```{r}
+sim_coeff_wide <- sim_coeff %>%
+  mutate(
+    ## Rename the terms to get easier variable names
+    term = ifelse(term == "(Intercept)", "alpha", "beta")
+  ) %>%
+  select(R, term, estimate) %>%
+  ## Pivot the data set so that we have the estimated coefficients as columns
+  pivot_wider(names_from = "term", values_from = "estimate")
+```
+
+Draw the straight lines estimated for each simulated sample.
+
+```{r}
+sim_coeff_wide %>%
+  filter(R < 50) %>%
+  ggplot() + 
+    geom_abline(aes(intercept = alpha, slope = beta, group = R), alpha = 0.1, size = 1/5) + 
+    ## Set the limits of x-axis
+    xlim(c(0, 1)) +
+    ## Set the limits of y-axis
+    ylim(c(0, 140))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
