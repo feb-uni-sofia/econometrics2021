@@ -106,10 +106,14 @@ $$
 $$
 ## Normalverteilung
 
+
+### Bedeuting der Parameter der Normalverteilung
+
 Die Dichtefunktion der Normalverteilung mit Parametern $\mu$ und $\sigma$ ist gegeben durch:
 $$
 f(x) = \frac{1}{\sqrt{\pi \sigma^2}}e^{-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2}, \quad y \in R
 $$
+
 
 wir schreiben $N(\mu, \sigma^2)$. Die Normalverteilung mit Erwartungswert $\mu = 0$ und Standardabweichung $\sigma = 1$ nennen wir die Standardnormalverteilung N(0, 1).
 
@@ -124,47 +128,36 @@ dnorm(x = 1, mean = 5, sd = 2)
 ```
 
 
-Visualise the density
+Graphische Darstellung der Dichtefunktion (Vorbereitung der Daten)
+
 ```{r}
 norm_df <- expand_grid(
   x = seq(-5, 5, length.out = 300),
-  mu = c(0),
-  sd = c(1)
+  mu = c(0, 1),
+  sigma = c(1, 2)
 ) %>%
   mutate(
-    y = dnorm(x, mean = mu, sd = sd)
+    y = dnorm(x, mean = mu, sd = sigma)
   )
 ```
 
-Visualise the densitites
+Graphische Darstellung der Dichtefunktion (Graphik zeichnen)
 
 ```{r}
 norm_df %>%
-  ggplot(aes(x = x, y = y, color = factor(mu), lty = factor(sd))) +
+  ggplot(aes(x = x, y = y, colour = factor(mu), lty = factor(sigma))) +
   geom_line()
-```
-The area under the density over an interval equals the probability of an event occurring in the interval.
 
-We take the standard normal distribution N(0, 1) and want to compute the probability of x occurring between -1 and 1.
-
-```{r}
-## p(probability)norm(normal distribution)
-pnorm(q = -1, mean = 0, sd = 1)
+## lty: line type
 ```
-$$
-P(x < -1|\mu = 0, \sigma = 1) = 0.1586553
-$$
-```{r}
-## p(probability)norm(normal distribution)
-pnorm(q = 1, mean = 0, sd = 1)
-```
+### Berechnung von Wahrscheinlichkeiten (Normalverteilung)
 
-$$
-P(x < 1|\mu = 0, \sigma = 1) = 0.8413447
-$$
-$$
-P(-1 < x < 1|\mu = 0, \sigma = 1) = P(x < 1|\mu = 0, \sigma = 1) - P(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
-$$
+
+<!-- The area under the density over an interval equals the probability of an event occurring in the interval. -->
+
+<!-- We take the standard normal distribution N(0, 1) and want to compute the probability of x occurring between -1 and 1. -->
+
+
 
 
 ```{r}
@@ -188,30 +181,55 @@ std_norm_plot <- d %>%
   labs(
     x = "x",
     y = "Normal density"
-  )
+  ) +
+  geom_vline(xintercept = -1, lty = 2) + 
+  geom_vline(xintercept = 1, lty = 2)
 
 plot(std_norm_plot)
 ```
-Draw 100 values from the N(0, 1) distribution.
+```{r}
+## p(probability/Wahrscheinlichkeit)norm(normal distribution)
+pnorm(-1, mean = 0, sd = 1)
+```
+
+$$
+P(x < -1|\mu = 0, \sigma = 1) = 0.1586553
+$$
+
+
+```{r}
+## p(probability)norm(normal distribution)
+pnorm(1, mean = 0, sd = 1)
+```
+
+$$
+P(x < 1|\mu = 0, \sigma = 1) = 0.8413447
+$$
+$$
+P(-1 < x < 1|\mu = 0, \sigma = 1) = P(x < 1|\mu = 0, \sigma = 1) - P(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
+$$
+
+Wir spielen das Spiel beschrieben duch die Standardnormalverteilung 100 Mal.
 
 ```{r}
 set.seed(123249)
-## r(random)norm(normal distribution)
+
+## r(random/zufällig)norm(normal distribution)
 norm_sim <- data.frame(
+  ## Ziehe 100 Werte aus der Standardnormalverteilung
   x = rnorm(100, mean = 0, sd = 1)
 ) %>%
   mutate(
-    ## &: logical AND
+    ## &: logisches UND
     x_in_interval = x < 1 & x > -1
   )
-
 
 ## Code for illustration only
 std_norm_plot + 
   geom_point(
     data = norm_sim, 
     aes(x = x, y = runif(100, -0.01, 0.01), colour = x_in_interval),
-    size = 1/2,
+    size = 1,
     alpha = 1/2
   )
 # +
@@ -222,71 +240,41 @@ std_norm_plot +
 table(norm_sim$x_in_interval)
 ```
 
+<!-- ```{r} -->
+<!-- d <- data.frame( -->
+<!--   x = seq(-5, 5, length.out = 200) -->
+<!-- ) %>% -->
+<!--   mutate( -->
+<!--     ## Dnorm computes the density  -->
+<!--     y = dnorm(x, mean = 0, sd = 1) -->
+<!--   ) -->
 
-
-You can compute the probability for an interval using `pnorm`.
-
-```{r}
-pnorm(0, mean = 0, sd = 1)
-```
-
-$$
-P(x < 0|\mu = 0, \sigma = 1) = \text{pnorm}(0, \text{mean} = 0, \text{sd} = 1) = 0.5
-$$
-Count how many of the simulated values are less than zero:
-
-```{r}
-## x < 0 returns a logical vector with TRUE/FALSE values
-## The sum of all these values equals the number of TRUE
-sum(norm_sim$x < 0)
-```
-
-```{r}
-## Probability that x > 0
-1 - pnorm(0, mean = 0, sd = 1)
-sum(norm_sim$x > 0)
-```
-
-```{r}
-## Probability that x > 0 and x < 1
-pnorm(1, mean = 0, sd = 1) - pnorm(0, mean = 0, sd = 1)
-sum(norm_sim$x < 1 & norm_sim$x > 0)
-```
-
-```{r}
-d <- data.frame(
-  x = seq(-5, 5, length.out = 200)
-) %>%
-  mutate(
-    ## Dnorm computes the density 
-    y = dnorm(x, mean = 0, sd = 1)
-  )
-
-## Code for illustration only
-d %>% 
-  ggplot(aes(x = x)) +
-  # note this next line is the only difference in code from the last plot
-  geom_ribbon(data = d %>% filter(x > -1, x < 1),
-              aes(ymin = 0, ymax = y), fill = "gray") +
-  geom_line(aes(y = y)) +
-  annotate(
-    geom = "text", 
-    x = 0, 
-    y = 0.2, 
-    label = substitute(
-      "Area" %~~% p,
-      list(
-        p = round(pnorm(1) - pnorm(-1), 2)
-      )
-    )
-  ) +
-  labs(
-    x = "x",
-    y = "Normal density"
-  )
-```
+<!-- ## Code for illustration only -->
+<!-- d %>%  -->
+<!--   ggplot(aes(x = x)) + -->
+<!--   # note this next line is the only difference in code from the last plot -->
+<!--   geom_ribbon(data = d %>% filter(x > -1, x < 1), -->
+<!--               aes(ymin = 0, ymax = y), fill = "gray") + -->
+<!--   geom_line(aes(y = y)) + -->
+<!--   annotate( -->
+<!--     geom = "text",  -->
+<!--     x = 0,  -->
+<!--     y = 0.2,  -->
+<!--     label = substitute( -->
+<!--       "Area" %~~% p, -->
+<!--       list( -->
+<!--         p = round(pnorm(1) - pnorm(-1), 2) -->
+<!--       ) -->
+<!--     ) -->
+<!--   ) + -->
+<!--   labs( -->
+<!--     x = "x", -->
+<!--     y = "Normal density" -->
+<!--   ) -->
+<!-- ``` -->
 
 ```{r}
+## Nur zur Illustration
 d %>% 
   ggplot(aes(x = x)) +
   # note this next line is the only difference in code from the last plot
@@ -298,7 +286,7 @@ d %>%
     x = 3,
     y = 0.05, 
     label = substitute(
-      "Area" %~~% p,
+      "p" %~~% p,
       list(
         p = round(1 - pnorm(1.964), 3)
         )
@@ -318,7 +306,6 @@ $$
 
 
 ```{r}
-
 d <- data.frame(
   x = seq(-5, 5, length.out = 200)
 ) %>%
@@ -345,7 +332,7 @@ y_i = \alpha + \beta x_i + e_i\\
 \text{Assume } e_i \sim N(0, \sigma^2)
 $$
 
-1. Generate 10 possible samples under the assumption of normal disturbances ($e_i$) and holding x fixed.
+1. Stichproben simulieren
 
 Let us assume that the $e_i$ term follows a normal distribution with mean zero and standard deviation $\sigma$.
 
@@ -356,8 +343,8 @@ Let us assume that the $e_i$ term follows a normal distribution with mean zero a
 kids %>% 
   group_by(mom_hs) %>%
   summarise(
-    n = n(),
-    mean = mean(kid_score)
+    "Anzahl von Kindern" = n(),
+    "Mittelwert" = mean(kid_score)
   )
 
 ## Estimate the standard deviation of the IQ scores (for all groups)
@@ -379,6 +366,8 @@ sim_df <- expand_grid(
     kid_score = 77.54839 + (89.31965 - 77.54839) * mom_hs + rnorm(10 * 434, mean = 0, sd = 20.41069)
   )
 ```
+
+
 Plot the distributions of scores for each simulated sample
 ```{r}
 sim_df %>%
