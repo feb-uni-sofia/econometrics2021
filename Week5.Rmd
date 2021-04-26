@@ -7,9 +7,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-## Warning: to compile the notes you need the bookdown and broom packages. Install them by
-## running install.packages("bookdown") and install.packages("broom"), see the commented
-## lines below
+## Warning: to compile the notes you need the "bookdown" and the "broom" packages. Install them by
+## running install.packages, see the commented lines below
 
 library(tidyverse)
 library(broom)
@@ -462,7 +461,7 @@ sim_coeff_wide <- sim_coeff %>%
   pivot_wider(names_from = "term", values_from = "estimate")
 ```
 
-Finally we can plot the regression lines for each sample.
+Finally, we can plot the regression lines for each sample.
 
 ```{r}
 sim_coeff_wide %>%
