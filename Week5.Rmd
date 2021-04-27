@@ -145,24 +145,25 @@ We write $N(\mu, \sigma^2)$ to refer to this distribution. The normal distributi
 
 ```{r}
 ## d(density)norm(normal distribution)
-## Wert der Dichtefunktion der Normalverteilung mit mu = 0, sigma = 1: N(0, 1)
+## Value of the normal density function with mu = 0, sigma = 1: N(0, 1)
 ?dnorm
 dnorm(x = 0, mean = 0, sd = 1)
 
-## Wert der Dichtefunktion mit mu = 5, sigma = 2: N(0, 4)
-dnorm(x = 1, mean = 5, sd = 2)
+## Value of the normal density function with mu = 5, sigma = 2: N(0, 4)
+dnorm(x = 0, mean = 5, sd = 2)
 ```
 
 
 ## Meaning of the parameters
 
-The expected value ($\mu$) is the location parameter of the distribution. It determines the location of the centre of the distribuion. The variance of the distribution determines the shape of the curve. Small values of $\sigma$ result in curves that are concentrated around the expected value ($\mu$). Large values fo $\sigma$ result in curves that are less concentrated around the expected value.
+The expected value ($\mu$) is the location parameter of the distribution. It determines the location of the centre of the distribution. The variance of the distribution determines the shape of the curve. Small values of $\sigma$ result in curves that are concentrated around the expected value ($\mu$). Large values fo $\sigma$ result in curves that are less concentrated around the expected value.
 
 
 To plot of the density function we first create a data set `norm_df` that holds a sequence of x-values between -5 and 5. We use `expand_grid` so that we obtain every combination between `x`, `mu` and `sigma`. The reason is that it is easier to plot the curves with ggplot when we can map variables in the data set to aesthetics like colour and line type.
 
 ```{r}
 norm_df <- expand_grid(
+  # x = c(1, 2),
   x = seq(-5, 5, length.out = 300),
   mu = c(0, 2),
   sigma = c(1, 2)
@@ -207,14 +208,6 @@ d <- data.frame(
   x = seq(-5, 5, length.out = 200)
 ) %>%
   mutate(
-    ## Dnorm computes the density 
-    y = dnorm(x, mean = 0, sd = 1)
-  )
-
-d <- data.frame(
-  x = seq(-5, 5, length.out = 200)
-) %>%
-  mutate(
     ## Dnorm computes the density
     y = dnorm(x, mean = 0, sd = 1)
   )
@@ -231,7 +224,7 @@ std_norm_plot <- d %>%
     x = 0,
     y = 0.2,
     label = substitute(
-      "Probability" %~~% p,
+      "P" %~~% p,
       list(
         p = round(pnorm(1) - pnorm(-1), 2)
       )
@@ -249,7 +242,7 @@ plot(std_norm_plot)
 ```
 
 ```{r}
-## p(probability/Wahrscheinlichkeit)norm(normal distribution)
+## p(probability)norm(normal distribution)
 pnorm(-1, mean = 0, sd = 1)
 ```
 
@@ -265,11 +258,6 @@ $$
 P(x < 1|\mu = 0, \sigma = 1) = 0.8413447
 $$
 
-
-
-
-
-
 $$
 \begin{align}
 (\#eq:prob-center)
@@ -279,7 +267,7 @@ $$
 Play a standard normal "game" 100 times.
 
 ```{r}
-## r(random/zufällig)norm(normal distribution)
+## r(random)norm(normal distribution)
 norm_sim <- data.frame(
   ## Draw 100 values from the standard normal distribution at random
   x = rnorm(100, mean = 0, sd = 1)
@@ -294,7 +282,7 @@ std_norm_plot +
   geom_point(
     data = norm_sim, 
     aes(x = x, y = runif(100, -0.01, 0.01), colour = x_in_interval),
-    size = 1,
+    size = 1.5,
     alpha = 1/2
   )
 # +
@@ -359,6 +347,7 @@ y_i = \alpha + \beta x_i + e_i\\
 \text{Assume } e_i \sim N(0, \sigma^2)
 $$
 
+
 Assume that we know the function that describes the population of children is:
 
 $$
@@ -367,6 +356,7 @@ $$
   y_i = 77.55 + 11.77 x_i + e_i
 \end{align}
 $$
+
 
 We would like to study the way the estimates for $\alpha$ and $\beta$ vary from sample to sample. For that purpose we will generate $R = 2000$ samples from the population described by equation \@ref(eq:reg-pop). The we will estimate the regression model for each of these 2000 samples. What follows is a lot of rather technical details that
 we need to generate the values for the samples and arrange these values in a way that is convenient for plotting and analysis.
@@ -415,7 +405,8 @@ sim_df <- sim_df %>%
     ## Compute a simulated IQ score for each kid according to our estimated regression equation
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 20.41 (that we estimated from the sample)
-    kid_score = 77.54839 + 11.77 * mom_hs + rnorm(2000 * 434, mean = 0, sd = 20.41069)
+    e = rnorm(2000 * 434, mean = 0, sd = 20.41069),
+    kid_score = 77.54839 + 11.77 * mom_hs + e
   )
 ```
 
@@ -440,6 +431,7 @@ sim_coeff %>%
 ```
 
 Here we use the `summarise_all` function to compute the mean for every variable in the simulation dataset, grouping it by term (remember, we have two terms in the output: the coefficients $\hat{\alpha}$ and $\hat{\beta}$).
+
 ```{r}
 ## Compute the mean of each column by coefficient
 sim_coeff %>%
