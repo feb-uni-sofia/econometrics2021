@@ -134,9 +134,8 @@ $$
 
 The density function of the normal distribution is given by:
 $$
-f(x) = \frac{1}{\sqrt{\pi \sigma^2}}e^{-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2}, \quad y \in R
+f(x) = \frac{1}{\sqrt{\pi \sigma^2}}e^{-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2}, \quad x \in R
 $$
-
 
 We write $N(\mu, \sigma^2)$ to refer to this distribution. The normal distribution has two parameters: $\mu$ and $\sigma$. It can be shown that $\mu$ is the expected value of the distribution and that $\sigma^2$ is the variance of the distribution.
 
