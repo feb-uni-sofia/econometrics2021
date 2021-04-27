@@ -472,7 +472,11 @@ sim_coeff_wide %>%
     ## Set the limits of x-axis
     xlim(c(0, 1)) +
     ## Set the limits of y-axis
-    ylim(c(65, 95))
+    ylim(c(65, 95)) +
+    labs(
+      x = "Educational status of the mother 1: with HS, 0: without HS",
+      y = "IQ test score"
+    )
 ```
 
 <!-- Plot the distributions of scores for each simulated sample -->
