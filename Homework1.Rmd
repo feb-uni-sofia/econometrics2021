@@ -1,0 +1,260 @@
+---
+title: "Econometrics 2021 Homework 1"
+author: "Boyko Amarov"
+date: "3/13/2021"
+output: html_document
+---
+
+All external packages required for this homework are loaded in the code chunk below. You don't need any additional
+packages this homework. There is also _no need_ to write your own custom functions. Use the notes from the first three weeks to get the necessary code and adapt it to the questions here. Please, _do not_ copy-paste the code mindlessly but try to understand what it does.
+
+- Submit your homework using the template that contains the question.
+- Please make sure that your homework Rmd file compiles without errors. Homeworks that do not compile  properly will not be graded and this includes the final homework as well.
+- Write the code only in code blocks, not outside.
+- Remove irrelevant parts.
+- Write your answer as text beneath the question and please do not remove the question text. Otherwise it can be quite hard to  discern the specific question that your answer refers to.
+
+```{r}
+## Load tidiverse packages
+## If necessary, uncomment the following line to install the tidyverse packages
+## You only need to run it once (per computer)
+## Comment that line again before submitting your solution
+
+## install.packages("tidyverse")
+library(tidyverse)
+
+## Read the data
+earnings <- read_csv(
+  "https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv", 
+  col_types = cols(
+    age = col_integer()
+  )) %>%
+  mutate(
+    sex = ifelse(male == 1, "Male", "Female")
+  ) %>%
+  select(height, earnk, sex, ethnicity)
+```
+
+Variables description:
+
+- `height` (numeric): height in inches (1 inch = 2.54 cm)
+- `earnk` (numeric): annual income in 1000 USD
+- `sex` (character): male/female
+
+## Problem 1 [12 pts]
+
+- [1 pts] Create a summary of the sample persons' annual income (variable `earnk`) using the `summary` function.
+
+```{r}
+## Create summary of earnk here
+summary(earnings$earnk)
+```
+- [4 pts] Describe the summary with a few short sentences in plain language (don't forget the unit of measurement!)
+
+The sample contains persons with income of up to 400,000 USD as well as persons without any income. About half of the persons had income less than 16,000 USD per year (median). About half of the persons had income between 6,000 and 27,000 USD (1st and 3th quartiles). The average income was 21,150 USD.
+
+- [1 pts] Create a boxplot for the sample income distribution.
+
+```{r}
+## Create the boxplot here. Set the plot title and axes labels using the labs function
+## see ?labs for help
+ggplot(data = earnings, aes(x=earnk)) + 
+  geom_boxplot()+ 
+  labs(
+    x = "Annual income (1000 USD)",
+    title = "Income distribution"
+  )
+```
+
+- [2 pts] Create a summary of the `sex` variable using the `table` function. Visualise the sample distribution of `sex` with a bar chart and describe it in one sentence (plain language). Set the plot title and axes labels.
+
+```{r}
+## Use the table function
+table(earnings$sex)
+```
+
+```{r}
+## Create the bar chart here
+ggplot(data=earnings, aes(x=sex)) +
+  geom_bar()
+```
+The sample contains 1141 women and 675 men.
+
+- [4 pts] Create boxplots for the sample income distribution by sex. Describe the differences between the income distribution of man and women visible from the plot (in a few _short_ sentences). Set the plot title and the axes labels using the `labs` function.
+
+```{r}
+## Create the boxplots here
+ggplot(data=earnings, aes(x=earnk, y=sex)) +
+  geom_boxplot() +
+  labs(
+    x = "Annual income (1000 USD)",
+    y = "Sex",
+    tittle = "Income distribution by sex"
+)
+```
+
+The boxplot show the quartiles of the income distribution for men and for women. The men in the sample tended to receive higher income (position of the median) and to be slightly more heterogeneous with respect income (width of the boxplots). 
+
+## Problem 2 [11 pts]
+
+- [1 pts] Create a new variable in the data frame `earnings` called `log_earnk` that holds the (natural) logarithm of `earnk`. Use `mutate` and the `log` function. If in doubt, see the documentation by running `?mutate` and `?log`.
+
+$$
+\text{log_earnk} = \log(\text{earnk})
+$$
+
+```{r}
+## Create log_earnk here
+# ?log
+earnings <- earnings %>%
+  mutate(
+    log_earnk = log(earnk)
+  )
+```
+
+- [2 pts] Create a scatterplot for height (x-axis) and log-income (y-axis). Set the plot title and axes labels (use the `labs` function).
+
+
+```{r}
+## Create the scatterplot here
+
+earnings %>%
+  ggplot(aes(x = height, y = log_earnk)) +
+  geom_point(position = "jitter") +
+  ## Not required for this homework, but you can add an estimated regression line using geom_smooth()
+  ## to help seeing a pattern
+  geom_smooth(method = "lm")
+```
+
+- [2 pts] Compute the correlation coefficient between log income and height using the `cor` function.
+
+A hint was missing in the original text asking you to remove observations with undefined logarithm of income (income = 0)
+before computing the correlation.
+
+```{r}
+earnk_positive_income <- earnings %>% filter(earnk > 0)
+cor(earnk_positive_income$log_earnk, earnk_positive_income$height)
+```
+
+- [6 pts] Interpret the pattern visible in the plot.
+
+There is certainly no _strong_ pattern in the scatterplot that is easily seen. Taller persons tended to have slightly higher incomes on average. The correlation between log-income and height is positive (although weak).
+At the first glance this does not appear to make much sense. Why would taller persons also have a higher income on average? Part of this correlation may be explained by gender income differences: men tend to be both taller than women and to earn more (see the first problem).
+
+
+## Problem 3 (computation), [6 pts]
+
+- [6 pts] Compute the sample covariance and the sample correlation coefficient for the set of values `x = (1, 3)` and `y = (0, -2)` _by hand_ (i.e without using `cov` or `cor`). Your computations must be reproducible! _Hint 1_: use the following formulas for the sample covariance and correlation. _Hint 2_: First compute the means ($\bar{x}$ and $\bar{y}$, then compute the standard deviations. _Hint 3_. $n = 2$.
+
+$$
+\rho(x, y) = \frac{Cov(x, y)}{S(x)S(y)} \text{ (sample correlation)}\\
+Cov(x, x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x}) \text{ (sample covariance)}\\
+S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (x_i - \bar{x})^2 \text{ (sample variance of x)}\\
+S^2(x) = \frac{1}{n - 1}\sum_{i = 1}^{n} (y_i - \bar{y})^2 \text{ (sample variance of y)}\\
+S(x) = \sqrt{S^2(x)} \text{ (sample standard deviation of x)}\\ 
+S(y) = \sqrt{S^2(y)} \text{ (sample standard deviation of y)}\\
+\bar{x} = \frac{1}{n}\sum_{1}^{n}x_i \text{ (sample mean of x)}\\
+\bar{y} = \frac{1}{n}\sum_{1}^{n}y_i \text{ (sample mean of y)}
+$$
+Write your answers in the math envirnoment below (the one between the dollar signs):
+
+NOTE: the Latex typesetting commands used below are used for better readibility of the compiled output but their use was _not_ required for the homework.
+
+$$
+x = (1,3)\\
+y = (0,-2)\\
+\bar{x} = \frac{1}{2}(1+3) = 2\\
+\bar{y} = \frac{1}{2}(0 + (-2)) = -1\\
+S^2(x) = \frac{1}{2} \left((1 - 2)^2 + (3 - 2) ^ 2\right)= 1 (1 + 1) = 2\\
+S^2(y) = \frac{1}{2} \left((0 - (-1))^2 + (-2 - (-1))^2\right) = 1(1 + 1) = 2 \\
+S(x) = \sqrt{2} \approx 1.41 \\
+S(y) = \sqrt{2} \approx 1.41 \\
+Cov(x, y) = \frac{1}{2} \left((1 - 2)(0 - (-1)) + (3 - 2)(-2 - (-1))\right) = 1 * \left((-1)*(1) + (1)*(-1)\right) = -1 -1 = -2 \\
+\rho(x, y) = -2/[\sqrt{2}*\sqrt{2}] = -2 / 2 = -1
+$$
+Why is the correlation coefficient -1 (this was not asked in the original question)? Because
+
+$$
+y = 1 - x\quad \text{linear dependency}
+$$
+
+You can also check the computations with R
+```{r}
+x <- c(1, 3)
+y <- c(0, -2)
+
+
+# NOTE: some homeworks used 1:3 instead of c(1, 3) and obtained different results. The reason is that c(1, 3) is not the same as 1:3. c(1, 3) creates a vector with two values: 1 and 3. 1:3 creates a
+# vector with the values 1, 2 and 3.
+
+# Compute the means
+mean(x)
+mean(y)
+
+# Compute the variances (s^2)
+var(x)
+var(y)
+
+# Compute the standard deviations
+sd(x)
+sd(y)
+
+# or equivalently
+
+sqrt(var(x))
+sqrt(var(y))
+
+# Compute the covariance
+cov(x, y)
+
+# Compute the correlation
+cor(x, y)
+```
+
+## Problem 4 (simulation) [12 pts]
+
+- [2 pts] Generate 100 random numbers from the uniform distribution between 0 and 1 (use `runif` with `min=0` and `max=1` arguments) and store the result in a variable called `x`. Create a new variable `y` such that:
+
+$$
+y = 12 + x - x^2
+$$
+_Hint_: use `x^2` to compute `x` to the power of 2.
+
+```{r}
+## Generate x and y here
+x <- runif(100, min = 0, max = 1)
+y <- 12 + x - x^2
+```
+
+- [2 pts] Compute the covariance and the correlation between `x` and `y` using the `cov` and `cor` functions.
+
+```{r}
+## Compute the covariance and the correlation between x and y here
+cov(x, y)
+cor(x, y)
+```
+
+- [2 pts] Create a scatterplot of `x` and `y`. 
+
+```{r}
+## Create the scatterplot here. Hint: uncomment the lines below
+
+ggplot(data = data.frame(x = x, y = y), aes(x = x, y = y)) +
+  geom_point()
+```
+- [6 pts] Explain why the correlation between `x` and `y` is close to zero despite the clear functional dependency between `x` and `y`.
+
+The correlation a measure for linear relationships. It is possible to have a low (even zero) correlation even though `x` and `y` are dependent. Note that a non-linear relationship between `x` and `y` does not _imply_ a zero correlation in all cases!
+
+## Problem 5 (survey) [12 pts]
+
+We have spent most of the past year living under unusual conditions because of the corona-virus pandemic. As part of the econometrics exercise classes we would like to launch an online survey and use it to research how student life was affected by the crisis.
+
+- Formulate three questions that you would like to ask your fellow colleagues about how their life has changed during the last 12 months (e.g. economic activity, social life change, e-learning experiences/problems, expectations about the future, attitude towards the vaccination)
+
+
+- Qestion 1 [3 pts]:
+
+- Qestion 2 [3 pts]:
+
+- Qestion 3 [3 pts]:
