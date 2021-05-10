@@ -12,6 +12,7 @@ output:
 
 library(tidyverse)
 library(broom)
+
 ## install.packages("bookdown")
 ## install.packages("broom")
 
@@ -57,7 +58,19 @@ ggplot(data = kids, aes(x = mom_hs, y = kid_score, color = factor(mom_hs))) +
 ggplot(data = kids, aes(x = kid_score, y = factor(mom_hs))) + 
   geom_boxplot()
 ```
+We can also visualise the distribution using histograms:
 
+```{r}
+ggplot(data = kids, aes(x = kid_score, color = factor(mom_hs))) + 
+  geom_histogram()
+```
+
+or density estimates
+
+```{r}
+ggplot(data = kids, aes(x = kid_score, color = factor(mom_hs))) + 
+  geom_density()
+```
 
 Assume that the kids were selected at random from the population of children in the USA (at the time of the survey).
 
@@ -148,7 +161,7 @@ We write $N(\mu, \sigma^2)$ to refer to this distribution. The normal distributi
 ?dnorm
 dnorm(x = 0, mean = 0, sd = 1)
 
-## Value of the normal density function with mu = 5, sigma = 2: N(0, 4)
+## Value of the normal density function with mu = 5, sigma = 2: N(5, 4)
 dnorm(x = 0, mean = 5, sd = 2)
 ```
 
@@ -164,8 +177,8 @@ To plot of the density function we first create a data set `norm_df` that holds 
 norm_df <- expand_grid(
   # x = c(1, 2),
   x = seq(-5, 5, length.out = 300),
-  mu = c(0, 2),
-  sigma = c(1, 2)
+  mu = c(0),
+  sigma = c(1/2, 1, 2)
 ) %>%
   mutate(
     y = dnorm(x, mean = mu, sd = sigma)
@@ -196,7 +209,6 @@ norm_df %>%
 
 ## Computing probabilities
 
-
 <!-- The area under the density over an interval equals the probability of an event occurring in the interval. -->
 
 <!-- We take the standard normal distribution N(0, 1) and want to compute the probability of x occurring between -1 and 1. -->
@@ -223,7 +235,7 @@ std_norm_plot <- d %>%
     x = 0,
     y = 0.2,
     label = substitute(
-      "P" %~~% p,
+      "Площ" %~~% p,
       list(
         p = round(pnorm(1) - pnorm(-1), 2)
       )
@@ -246,7 +258,7 @@ pnorm(-1, mean = 0, sd = 1)
 ```
 
 $$
-P(x < -1|\mu = 0, \sigma = 1) = 0.1586553
+Площ(x < -1|\mu = 0, \sigma = 1) = 0.1586553
 $$
 ```{r}
 ## p(probability)norm(normal distribution)
@@ -254,13 +266,13 @@ pnorm(1, mean = 0, sd = 1)
 ```
 
 $$
-P(x < 1|\mu = 0, \sigma = 1) = 0.8413447
+Площ(x < 1|\mu = 0, \sigma = 1) = 0.8413447
 $$
 
 $$
 \begin{align}
 (\#eq:prob-center)
-P(-1 < x < 1|\mu = 0, \sigma = 1) = P(x < 1|\mu = 0, \sigma = 1) - P(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
+Площ(-1 < x < 1|\mu = 0, \sigma = 1) = Площ(x < 1|\mu = 0, \sigma = 1) - Площ(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
 \end{align}
 $$
 Play a standard normal "game" 100 times.
@@ -292,12 +304,13 @@ Count how many games end up with a result between -1 and 1 and compare this coun
 
 ```{r}
 table(norm_sim$x_in_interval)
+sum(norm_sim$x_in_interval) ## or equivalently
 ```
 
 Commonly we need to compute probabilities for events like (x > 2). To compute it using `pnorm` we will make use of the fact that the entire area under the density curve equals 1.
 
 ```{r}
-## Nur zur Illustration
+## For illustration only
 d %>% 
   ggplot(aes(x = x)) +
   # note this next line is the only difference in code from the last plot
@@ -390,6 +403,7 @@ Next we construct a data set using `expand_grid` to replicate the `mom_hs` colum
 
 ## Construct a data set with mom_hs repeated R = 2000 times
 ## Examine the contents of sim_df to see what expand_grid returns
+
 sim_df <- expand_grid(
     R = 1:2000,
     mom_hs = kids$mom_hs
