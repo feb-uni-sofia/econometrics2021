@@ -414,6 +414,10 @@ sim_df <- expand_grid(
 After that we calculate the (simulated) IQ score for every child in every sample (a total of $2000 \times 434$ values) by using equation \@ref{eq:pop-reg}. For the value of the random term we select a value from the normal distribution with mean 0 and standard deviation $\sigma = 20.41069$ (we will turn to the estimation of $\sigma$ later).
 
 ```{r}
+## Fixes the random numbers sequence so that you can reproduce the 
+## random draws
+set.seed(4234)
+
 sim_df <- sim_df %>%
   mutate(
     ## Compute a simulated IQ score for each kid according to our estimated regression equation
@@ -429,20 +433,22 @@ The last step completes the simulation of our 2000 samples and we can start esti
 
 ```{r}
 sample1 <- sim_df %>% filter(R == 1)
-head(sample1)
-```
-```{r}
 lm(kid_score ~ mom_hs, data = sample1)
 ```
 
 ```{r}
 sample2 <- sim_df %>% filter(R == 2)
-head(sample2)
-```
-```{r}
-lm(kid_score ~ mom_hs, data = sample2)
 tidy(lm(kid_score ~ mom_hs, data = sample2))
 ```
+```{r}
+head(sample1)
+```
+
+```{r}
+head(sample2)
+```
+
+
 
 
 ```{r}
@@ -461,15 +467,17 @@ The data set `sim_coeff` now contains estimated coefficients ($\hat{\alpha}$ and
 slopes <- sim_coeff %>%
   filter(term == "mom_hs")
 
-slopes %>%
-  ggplot(aes(x = estimate)) + 
-  geom_density()
+# slopes %>%
+#   ggplot(aes(x = estimate)) + 
+#   geom_density()
 ```
+
 
 ```{r}
 slopes %>%
   ggplot(aes(x = estimate)) + 
   geom_boxplot() +
+  geom_point(aes(y = 0), position = "jitter", alpha = 0.1, size = 1/3) +
   labs(
     x = "Slope estimate",
     title = "Distribution of slope estimates (over 2000 samples)"
