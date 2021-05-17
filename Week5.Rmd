@@ -426,7 +426,7 @@ sim_df <- sim_df %>%
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 19.85 (that we estimated from the sample)
     # e = rnorm(2000 * 434, mean = 0, sd = 19.85),
-    e = rnorm(2000 * 434, mean = 0, sd = 40),
+    e = rnorm(2000 * 434, mean = 0, sd = 19.85),
     kid_score = 77.54839 + 11.77 * mom_hs + e
   )
 ```
@@ -616,7 +616,8 @@ p2 <- sim_2 %>%
       ) +
     scale_y_continuous(breaks = NULL)
 
-p1 + p2
+p1 
+# + p2
 ```
 
 ```{r}
@@ -696,10 +697,30 @@ table_data %>%
   kableExtra::kable_styling()
 ```
 
+```{r}
+## Code for illustration only
+table_data_h0 <- expand_grid(
+  H0 = c("True", "False"),
+  Decision = c("Not reject", "Reject")
+) %>%
+  mutate(
+    Error = c("-", "Reject a true null hypothesis", "Fail to reject a false null hypothesis", "-")
+  )
+
+table_data_h0 %>% 
+  knitr::kable() %>%
+  kableExtra::kable_styling()
+```
+
+
 
 
 
 How does this statistic vary from sample to sample? We will answer this with a simulation:
+
+$$
+\text{kid_score}_i = 77.55 + \underbrace{\beta}_{ = 0} \text{mom_hs}_i + e_i
+$$
 
 ```{r}
 ## y = 77.5 + 0 x + e
@@ -725,24 +746,54 @@ sim_h0 <- expand_grid(
 
 ```{r}
 sim_h0 %>%
+  ggplot(aes(x = estimate)) +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      x = "estimates for beta (real beta = 0)"
+    )
+```
+
+```{r}
+sim_h0 %>%
   ggplot(aes(x = statistic)) +
     geom_boxplot() +
     geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
     geom_vline(xintercept = 0, colour = "firebrick4") +
     labs(
-      x = "t-statistic"
-    )
+      title = "Distribution of the t-statistic",
+      x = "Values of the t-statistic"
+    ) +
+    geom_vline(xintercept = c(-1, 1), lty = 2) +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
 ```
+
+```{r}
+sum(sim_h0$statistic < -1) + sum(sim_h0$statistic > 1)
+```
+610 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
+
+```{r}
+610 / 2000
+```
+```{r}
+sum(sim_h0$statistic < -2) + sum(sim_h0$statistic > 2)
+```
+```{r}
+86 / 2000
+```
+
 
 ```{r}
 summary(sim_h0$statistic)
 quantile(sim_h0$statistic, prob = c(0.025, 0.25, 0.5, 0.75, 0.975))
 ```
+
 ```{r}
 qt(0.025, df = nrow(kids) - 2)
 ```
-
-
 
 
 ## t-distribution
@@ -754,7 +805,7 @@ p is the number of coefficients in the model. In our example $p = 2$ (one coeffi
 sim_h0 %>%
   ggplot(aes(x = statistic)) +
     geom_density(color = "steelblue4") +
-    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+    stat_function(fun = dt, n = 101, args = list(df = nrow(kids) - 2)) +
     labs(
       x = "t-statistic"
     ) 
