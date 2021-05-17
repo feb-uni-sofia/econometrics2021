@@ -472,7 +472,7 @@ slopes <- sim_coeff %>%
 ```
 
 
-```{r}
+```{r, fig.cap=""}
 slopes %>%
   ggplot(aes(x = estimate)) + 
   geom_boxplot() +
@@ -558,21 +558,23 @@ $$
 H_0: \beta = 0\\
 H_1: \beta \neq 0
 $$
-Implies that the difference between the expected group average scores are equal:
+Implies that the difference between the expected group average scores (in the population) is zero (no difference).
 
 $$
 \beta_0 \iff  \mu_1 = \mu_0
 $$
 
+A statistic (function of the data) that summarises the evidence against the null hypothesis.
+
 $$
 T = \frac{\hat{\beta} - \beta_0}{\hat{SE}(\beta)}
 $$
-
-Simulation:
+How does this statistic vary from sample to sample? We will answer this with a simulation:
 
 ```{r}
 ## y = 77.5 + 0 x + e
 number_of_samples <- 2000
+sample_size <- nrow(kids)
 
 sim_h0 <- expand_grid(
     R = 1:number_of_samples,
@@ -582,8 +584,8 @@ sim_h0 <- expand_grid(
     ## Compute a simulated IQ score for each kid according to our estimated regression equation
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 19.85 (that we estimated from the sample)
-    e = rnorm(number_of_samples * nrow(kids), mean = 0, sd = 19.85),
-    kid_score = 77.54839 + 2 * mom_hs + e
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    y = 77.54839 + 0 * mom_hs + e
   ) %>%
   group_by(R) %>%
   do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
@@ -595,8 +597,66 @@ sim_h0 %>%
   ggplot(aes(x = statistic)) +
     geom_boxplot() +
     geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
-    geom_vline(xintercept = 0, colour = "firebrick4")
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      x = "t-statistic"
+    )
 ```
+
+```{r}
+summary(sim_h0$statistic)
+quantile(sim_h0$statistic, prob = c(0.025, 0.25, 0.5, 0.75, 0.975))
+```
+```{r}
+qt(0.025, df = nrow(kids) - 2)
+```
+
+
+## Types of errors
+
+```{r}
+## Code for illustration only
+table_data <- expand_grid(
+  Reality = c("Guilty", "Not guilty"),
+  Decision = c("Guilty", "Not guilty")
+) %>%
+  mutate(
+    Error = c("-", "Fail to sentence a guilty person", "Sentence an innocent person", "-")
+  )
+
+table_data %>% 
+  knitr::kable() %>%
+  kableExtra::kable_styling()
+```
+
+## t-distribution
+
+If the null hypothesis is true the t-statistic follows a t-distribution with $n - p$ degrees of freedoms, where
+p is the number of coefficients in the model. In our example $p = 2$ (one coefficient for the intercept and another coefficient for the slope).
+
+```{r}
+sim_h0 %>%
+  ggplot(aes(x = statistic)) +
+    geom_density(color = "steelblue4") +
+    stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) +
+    labs(
+      x = "t-statistic"
+    ) 
+```
+
+
+```{r}
+td_sim <- data.frame(
+  x = seq(-4, 4)
+)
+
+td_sim %>%
+  ggplot(aes(x = x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1), colour = "firebrick") +
+  stat_function(fun = dt, n = 101, args = list(df = 1), colour = "steelblue") +
+  stat_function(fun = dt, n = 101, args = list(df = 10), colour = "steelblue", lty = 2)
+```
+
 
 
 <!-- Plot the distributions of scores for each simulated sample -->

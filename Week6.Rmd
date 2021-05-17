@@ -1,0 +1,44 @@
+---
+title: 'Week 6: Multiple regression'
+author: "Boyko Amarov"
+date: "5/14/2021"
+output: html_document
+---
+
+## Cholera outbreak
+
+[Jon Snow](https://gameofthrones.fandom.com/wiki/Jon_Snow) is a character from George R. R. Martin's "Fire and Ice" novel who fought the Night King and helped bring peace to Westeros.
+
+![Jon Snow](https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png)
+
+![John Snow](https://upload.wikimedia.org/wikipedia/commons/c/cc/John_Snow.jpg)
+
+
+[John Snow](https://en.wikipedia.org/wiki/John_Snow) was an English physicist famous for locating the source of the London cholera epidemic of 1854. At the time of the outbreak the germ theory of disease transmission was not developed yet and cholera was blamed on bad air. John Snow investigated the cases and concluded that the source of the outbreak is a water pump located on Broad Street. He was able to convince the city council to close the pump but people initially resisted his theory of water born transmission, because it seemed to be socially unacceptable.
+
+
+
+
+![Cholera cases](http://blog.rtwilson.com/wp-content/uploads/2012/01/SnowMap_Points.png)
+
+![Broad street pump](https://upload.wikimedia.org/wikipedia/commons/c/cb/John_Snow_memorial_and_pub.jpg)
+
+
+## World War II
+
+During World war 2 combat aviation played a crucial role but also suffered heavy casualties. British bomber command for example reports a death rate of about 46 percent over the entire war. In order to reduce the number of planes that were being shot down during mission, the military collected data on the damage taken from returning bombers in order to decide where to place armour on the planes.
+
+
+![Flight](https://images.squarespace-cdn.com/content/v1/5497331ae4b0148a6141bd47/1563476799483-JXTY82K6EJ2Y6THNIN53/ke17ZwdGBToddI8pDm48kAY9gT9wm-2Z9KnmFRfe2dVZw-zPPgdn4jUwVcJE1ZvWQUxwkmyExglNqGp0IvTJZUJFbgE-7XRK3dMEBRBhUpzdMdQQVVUpiXVl6rYD3wsGGtpDQQshX7-5HE1V8UScgaHj4j2hNsP6urc280cwWcU/7.jpg)
+
+![Anti-air gun](https://i.pinimg.com/originals/1d/fe/6f/1dfe6f294ee4c277d5ce8031e9fe9fc9.jpg)
+
+
+![Flac damage on a bomber plane](https://www.old.bombercommandmuseum.ca/photos/p_airgunners1b.jpg)
+
+
+![Bullet holes locations (histogram)](https://alearningadayblog.files.wordpress.com/2018/06/bombers.jpeg)
+<!-- ![fsdf](https://riskwerk.files.wordpress.com/2016/11/abraham-wald1.png) -->
+
+
+
