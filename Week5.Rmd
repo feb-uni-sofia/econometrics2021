@@ -12,7 +12,9 @@ output:
 
 library(tidyverse)
 library(broom)
+library(patchwork)
 
+## install.packages("patchwork")
 ## install.packages("bookdown")
 ## install.packages("broom")
 
@@ -235,7 +237,7 @@ std_norm_plot <- d %>%
     x = 0,
     y = 0.2,
     label = substitute(
-      "Площ" %~~% p,
+      "Area" %~~% p,
       list(
         p = round(pnorm(1) - pnorm(-1), 2)
       )
@@ -258,7 +260,7 @@ pnorm(-1, mean = 0, sd = 1)
 ```
 
 $$
-Площ(x < -1|\mu = 0, \sigma = 1) = 0.1586553
+Area(x < -1|\mu = 0, \sigma = 1) = 0.1586553
 $$
 ```{r}
 ## p(probability)norm(normal distribution)
@@ -266,13 +268,13 @@ pnorm(1, mean = 0, sd = 1)
 ```
 
 $$
-Площ(x < 1|\mu = 0, \sigma = 1) = 0.8413447
+Area(x < 1|\mu = 0, \sigma = 1) = 0.8413447
 $$
 
 $$
 \begin{align}
 (\#eq:prob-center)
-Площ(-1 < x < 1|\mu = 0, \sigma = 1) = Площ(x < 1|\mu = 0, \sigma = 1) - Площ(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
+Area(-1 < x < 1|\mu = 0, \sigma = 1) = Area(x < 1|\mu = 0, \sigma = 1) - Area(x < -1|\mu = 0, \sigma = 1) = 0.841 - 0.158 = 0.682
 \end{align}
 $$
 Play a standard normal "game" 100 times.
@@ -423,7 +425,8 @@ sim_df <- sim_df %>%
     ## Compute a simulated IQ score for each kid according to our estimated regression equation
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 19.85 (that we estimated from the sample)
-    e = rnorm(2000 * 434, mean = 0, sd = 19.85),
+    # e = rnorm(2000 * 434, mean = 0, sd = 19.85),
+    e = rnorm(2000 * 434, mean = 0, sd = 40),
     kid_score = 77.54839 + 11.77 * mom_hs + e
   )
 ```
@@ -472,7 +475,7 @@ slopes <- sim_coeff %>%
 ```
 
 
-```{r, fig.cap=""}
+```{r}
 slopes %>%
   ggplot(aes(x = estimate)) + 
   geom_boxplot() +
@@ -481,7 +484,8 @@ slopes %>%
     x = "Slope estimate",
     title = "Distribution of slope estimates (over 2000 samples)"
   ) +
-  geom_vline(xintercept = 11.77, color = "red")
+  geom_vline(xintercept = 11.77, color = "red") +
+  xlim(c(0, 21))
 ```
 ```{r}
 summary(slopes$estimate)
@@ -542,6 +546,7 @@ summary(fit)
 sd(slopes$estimate)
 ```
 
+
 ```{r}
 ## Standard deviation
 sd(c(1, 2, 200, 1000))
@@ -549,6 +554,76 @@ sd(c(1, 1, 1, 3))
 sd(c(1, 1, 1, 1))
 # sd(11.771)
 ```
+
+## Standard error of $\hat{\beta}$
+
+We compare the distributions of $\hat{\beta}$ with two different simulation. The first one using $\sigma = 19.85$ and the second one $\sigma = 40$
+
+```{r}
+## Here we simply write the whole simulation in a more compact way
+## y = 77.5 + 0 x + e
+number_of_samples <- 2000
+sample_size <- nrow(kids)
+
+sim_1 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    kid_score = 77.54839 + 11.77 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+
+sim_2 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 40),
+    kid_score = 77.54839 + 11.77 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+```
+
+```{r}
+p1 <- sim_1 %>%
+  ggplot(aes(x = estimate, y = 0)) +
+    geom_boxplot() +
+    geom_point(position = "jitter", size = 1/3, alpha = 0.2) +
+    xlim(c(-5, 30)) +
+    labs(
+      x = "Estimate for beta",
+      y = "",
+      title = "sigma = 19.85"
+    ) +
+  scale_y_continuous(breaks = NULL)
+p2 <- sim_2 %>%
+  ggplot(aes(x = estimate, y = 0)) +
+    geom_boxplot() +
+    geom_point(position = "jitter", size = 1/3, alpha = 0.2) +
+    xlim(c(-5, 30)) +
+    labs(
+        x = "Estimate for beta",
+        y = "",
+        title = "sigma = 40"
+      ) +
+    scale_y_continuous(breaks = NULL)
+
+p1 + p2
+```
+
+```{r}
+sd(sim_1$estimate)
+sd(sim_2$estimate)
+```
+
 
 ## Hypothesis tests
 
@@ -558,7 +633,36 @@ $$
 H_0: \beta = 0\\
 H_1: \beta \neq 0
 $$
+
+$$
+y_i = \alpha + \beta x_i + e_i\\
+\beta = 0 \implies y_i = \alpha + e_i
+$$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Implies that the difference between the expected group average scores (in the population) is zero (no difference).
+
+
 
 $$
 \beta_0 \iff  \mu_1 = \mu_0
@@ -567,8 +671,34 @@ $$
 A statistic (function of the data) that summarises the evidence against the null hypothesis.
 
 $$
-T = \frac{\hat{\beta} - \beta_0}{\hat{SE}(\beta)}
+t = \frac{\hat{\beta} - 0}{\hat{SE}(\hat{\beta})}
 $$
+$t$ grows with the difference between $\hat{\beta}$ and $0$ and it grows with decreasing
+standard error.
+
+$$
+t = \frac{11.77}{2.322} = 5.069
+$$
+## Types of errors
+
+```{r}
+## Code for illustration only
+table_data <- expand_grid(
+  Reality = c("Guilty", "Not guilty"),
+  Decision = c("Convict", "Not convict")
+) %>%
+  mutate(
+    Error = c("-", "Fail to sentence a guilty person", "Sentence an innocent person", "-")
+  )
+
+table_data %>% 
+  knitr::kable() %>%
+  kableExtra::kable_styling()
+```
+
+
+
+
 How does this statistic vary from sample to sample? We will answer this with a simulation:
 
 ```{r}
@@ -585,13 +715,14 @@ sim_h0 <- expand_grid(
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 19.85 (that we estimated from the sample)
     e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
-    y = 77.54839 + 0 * mom_hs + e
+    kid_score = 77.54839 + 0 * mom_hs + e
   ) %>%
   group_by(R) %>%
   do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
   select(R, term, estimate, statistic) %>%
   filter(term == "mom_hs")
 ```
+
 ```{r}
 sim_h0 %>%
   ggplot(aes(x = statistic)) +
@@ -612,22 +743,7 @@ qt(0.025, df = nrow(kids) - 2)
 ```
 
 
-## Types of errors
 
-```{r}
-## Code for illustration only
-table_data <- expand_grid(
-  Reality = c("Guilty", "Not guilty"),
-  Decision = c("Guilty", "Not guilty")
-) %>%
-  mutate(
-    Error = c("-", "Fail to sentence a guilty person", "Sentence an innocent person", "-")
-  )
-
-table_data %>% 
-  knitr::kable() %>%
-  kableExtra::kable_styling()
-```
 
 ## t-distribution
 
