@@ -131,6 +131,7 @@ $\beta$ is the difference between expected IQ scores of kids in the first group 
 ```{r}
 lm(kid_score ~ 1 + mom_hs, data = kids)
 ```
+
 Estimated regression equation
 $$
 \hat{\alpha} = 77.55 \\
@@ -389,13 +390,8 @@ kids %>%
   )
 ```
 
-Next we calculate the _sample_ standard deviation of the IQ test scores (`kid_score`) and for now we will use this value for the standard deviation of the random terms $e_i$.
+<!-- Next we calculate the _sample_ standard deviation of the IQ test scores (`kid_score`) and for now we will use this value for the standard deviation of the random terms $e_i$. -->
 
-```{r}
-## Estimate the standard deviation of the IQ scores (for all groups)
-## so that we can base our simulation on a plausible value
-sd(kids$kid_score)
-```
 
 
 Next we construct a data set using `expand_grid` to replicate the `mom_hs` column $R = 2000$ times.
@@ -490,6 +486,7 @@ slopes %>%
 ```{r}
 summary(slopes$estimate)
 ```
+
 ```{r}
 sd(slopes$estimate)
 ```
@@ -616,8 +613,7 @@ p2 <- sim_2 %>%
       ) +
     scale_y_continuous(breaks = NULL)
 
-p1 
-# + p2
+p1 + p2
 ```
 
 ```{r}
@@ -640,30 +636,7 @@ y_i = \alpha + \beta x_i + e_i\\
 \beta = 0 \implies y_i = \alpha + e_i
 $$
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Implies that the difference between the expected group average scores (in the population) is zero (no difference).
-
-
 
 $$
 \beta_0 \iff  \mu_1 = \mu_0
@@ -736,23 +709,12 @@ sim_h0 <- expand_grid(
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 19.85 (that we estimated from the sample)
     e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
-    kid_score = 77.54839 + 0 * mom_hs + e
+    kid_score = 77.54839 + 5 * mom_hs + e
   ) %>%
   group_by(R) %>%
   do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
   select(R, term, estimate, statistic) %>%
   filter(term == "mom_hs")
-```
-
-```{r}
-sim_h0 %>%
-  ggplot(aes(x = estimate)) +
-    geom_boxplot() +
-    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
-    geom_vline(xintercept = 0, colour = "firebrick4") +
-    labs(
-      x = "estimates for beta (real beta = 0)"
-    )
 ```
 
 ```{r}
@@ -765,24 +727,25 @@ sim_h0 %>%
       title = "Distribution of the t-statistic",
       x = "Values of the t-statistic"
     ) +
-    geom_vline(xintercept = c(-1, 1), lty = 2) +
-    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    # geom_vline(xintercept = c(-1, 1), lty = 2) +
+    # geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
     scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
 ```
 
 ```{r}
 sum(sim_h0$statistic < -1) + sum(sim_h0$statistic > 1)
 ```
-610 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
+670 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
 
 ```{r}
-610 / 2000
+670 / 2000
 ```
 ```{r}
 sum(sim_h0$statistic < -2) + sum(sim_h0$statistic > 2)
 ```
 ```{r}
-86 / 2000
+79 / 2000
 ```
 
 
