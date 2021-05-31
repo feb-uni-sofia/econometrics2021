@@ -691,7 +691,7 @@ $$
 $$
 
 ```{r}
-## y = 77.5 + 0 x + e
+
 number_of_samples <- 2000
 sample_size <- nrow(kids)
 
@@ -701,6 +701,7 @@ sim_h0 <- expand_grid(
   ) %>%
   mutate(
     e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    ## y = 77.5 + 0 x + e
     kid_score = 77.54839 + 0 * mom_hs + e
   ) %>%
   group_by(R) %>%
@@ -709,6 +710,7 @@ sim_h0 <- expand_grid(
   filter(term == "mom_hs")
 ```
 
+
 ```{r}
 sim_h0 %>%
   ggplot(aes(x = estimate)) +
@@ -716,13 +718,13 @@ sim_h0 %>%
     geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
     geom_vline(xintercept = 0, colour = "firebrick4") +
     labs(
-      title = "Distribution of beta hat",
-      x = "Values of the t-statistic"
+      title = "Distribution of beta hat (beta = 0)",
+      x = "Slope estimates (beta hat)"
     ) +
     # geom_vline(xintercept = c(-1, 1), lty = 2) +
     # geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
     # geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
-    scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
+    scale_x_continuous(breaks = c(-7, -5, -2, -1, 0, 1, 2, 5, 7))
 ```
 
 ```{r}
@@ -732,28 +734,28 @@ sim_h0 %>%
     geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
     geom_vline(xintercept = 0, colour = "firebrick4") +
     labs(
-      title = "Distribution of the t-statistic",
+      title = "Distribution the t-statistic (beta = 0)",
       x = "Values of the t-statistic"
     ) +
     geom_vline(xintercept = c(-1, 1), lty = 2) +
     geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
     geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
-    scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
+    scale_x_continuous(breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4))
 ```
 
 ```{r}
 sum(sim_h0$statistic < -1) + sum(sim_h0$statistic > 1)
 ```
-655 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
+624 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
 
 ```{r}
-655 / 2000
+624 / 2000
 ```
 ```{r}
 sum(sim_h0$statistic < -2) + sum(sim_h0$statistic > 2)
 ```
 ```{r}
-112 / 2000
+90 / 2000
 ```
 ```{r}
 ## y = 77.5 + 0 x + e
@@ -785,8 +787,8 @@ sim_h1 %>%
       x = "Values of the t-statistic"
     ) +
     # geom_vline(xintercept = c(-1, 1), lty = 2) +
-    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
-    geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4", lwd = 2) +
+    geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue", lwd = 2) +
     scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
 ```
 
@@ -804,6 +806,22 @@ sim_h0 %>%
       x = "t-statistic"
     ) 
 ```
+```{r}
+## t-distribution has one parameter called the degrees of freedom
+
+## The degrees of freedom equal the number of observations minus the number of model coefficients
+## For the kids dataset df = 434 (observations) - 2 (coefficients: alpha: Intercept, beta: coefficient of mom_hs)
+
+## At 95% significance level
+## q: quantile, t: t-distribution: computes a value of x such that the probability P(T < x) = p
+qt(0.05 / 2, df = nrow(kids) - 2)
+qt(1 - 0.05 / 2, df = nrow(kids) - 2)
+
+## At 99% significance level
+qt(0.01 / 2, df = nrow(kids) - 2)
+qt(1 - 0.01 / 2, df = nrow(kids) - 2)
+```
+
 
 ```{r}
 td_sim <- data.frame(
@@ -819,18 +837,7 @@ td_sim %>%
 
 Critical values derived from the t-distribution
 
-```{r}
 
-## The degrees of freedom equal the number of observations minus the number of model coefficients
-
-## At 95% significance level
-qt(0.05 / 2, df = nrow(kids) - 2)
-qt(1 - 0.05 / 2, df = nrow(kids) - 2)
-
-## At 99% significance level
-qt(0.01 / 2, df = nrow(kids) - 2)
-qt(1 - 0.01 / 2, df = nrow(kids) - 2)
-```
 
 
 <!-- Plot the distributions of scores for each simulated sample -->
