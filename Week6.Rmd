@@ -88,6 +88,43 @@ p2 <- florida_crime %>%
   geom_polygon()
 p1 + p2
 ```
+
+$$
+\underbrace{C_i}_{Crime} = \alpha + \beta \underbrace{\text{HS}_i}_{\text{Share of persons with high school degree}} + e_i
+$$
+
+
+```{r}
+fit <- lm(C ~ HS, data = crime)
+summary(fit)
+```
+
+Estimated equation:
+
+$$
+\underbrace{C_i}_{Crime} = -50.8 + 1.48 \underbrace{\text{HS}_i}_{\text{Share of persons with high school degree}}
+$$
+Interpretation: comparing two counties: that differ by 1 percentage point on HS we expect the county with the higher HS to have 1.48 crimes
+more for 100,000 inhabitants.
+
+$$
+\underbrace{C_i}_{Crime} = \alpha + \beta \underbrace{\text{U}_i}_{\text{Share of persons in urban areas}} + e_i
+$$
+
+```{r}
+fit_U <- lm(C ~ U, data = crime)
+summary(fit_U)
+```
+$$
+C_i = \alpha + \beta_1 \text{HS}_i  + \beta_2 \text{U}_i + e_i
+$$
+
+```{r}
+fit_U_HS <- lm(C ~ HS + U, data = crime)
+summary(fit_U_HS)
+```
+
+
 ```{r}
 crime %>%
   select(C, HS, U) %>%
