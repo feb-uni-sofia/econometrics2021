@@ -39,6 +39,57 @@ During World war 2 combat aviation played a crucial role but also suffered heavy
 
 ![Bullet holes locations (histogram)](https://alearningadayblog.files.wordpress.com/2018/06/bombers.jpeg)
 ![fsdf](https://riskwerk.files.wordpress.com/2016/11/abraham-wald1.png)
+# Two continuous predictors
+
+```{r}
+library(tidyverse)
+library(patchwork)
+
+crime <- read_tsv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/crime.csv")
+```
 
 
+```{r}
+## Code for illustration purposes only
 
+us_counties <- map_data("county")
+florida_counties <- us_counties %>%
+  filter(region == "florida")
+
+crime_match <- crime %>%
+  mutate(
+    County = str_to_lower(str_replace_all(County, "\\.", ""))
+  )
+
+county_name_compat <- c(
+  "washington" = "washing",
+  "santa rosa" = "santar",
+  "suwannee" = "suwanee",
+  "palm beach" = "palmb",
+  "okeechobee" = "okeech",
+  "indian river" = "indianr",
+  "hillsborough" = "hillsbor",
+  "miami-dade" = "dade"
+)
+
+florida_crime <- florida_counties %>%
+  mutate(
+    County = dplyr::recode(subregion, !!!county_name_compat),
+    County = str_replace_all(County, "\\s", "")
+  ) %>%
+  left_join(crime_match, by = "County")
+
+p1 <- florida_crime %>%
+  ggplot(aes(x = long, y = lat, group = group, fill = U)) +
+  geom_polygon()
+
+p2 <- florida_crime %>%
+  ggplot(aes(x = long, y = lat, group = group, fill = HS)) +
+  geom_polygon()
+p1 + p2
+```
+```{r}
+crime %>%
+  select(C, HS, U) %>%
+  pairs()
+```

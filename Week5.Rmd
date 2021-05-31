@@ -362,7 +362,6 @@ y_i = \alpha + \beta x_i + e_i\\
 \text{Assume } e_i \sim N(0, \sigma^2)
 $$
 
-
 Assume that we know the function that describes the population of children is:
 
 $$
@@ -685,10 +684,6 @@ table_data_h0 %>%
   kableExtra::kable_styling()
 ```
 
-
-
-
-
 How does this statistic vary from sample to sample? We will answer this with a simulation:
 
 $$
@@ -705,16 +700,29 @@ sim_h0 <- expand_grid(
     mom_hs = kids$mom_hs
   ) %>%
   mutate(
-    ## Compute a simulated IQ score for each kid according to our estimated regression equation
-    ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
-    ## deviation (sigma) = 19.85 (that we estimated from the sample)
     e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
-    kid_score = 77.54839 + 5 * mom_hs + e
+    kid_score = 77.54839 + 0 * mom_hs + e
   ) %>%
   group_by(R) %>%
   do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
   select(R, term, estimate, statistic) %>%
   filter(term == "mom_hs")
+```
+
+```{r}
+sim_h0 %>%
+  ggplot(aes(x = estimate)) +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      title = "Distribution of beta hat",
+      x = "Values of the t-statistic"
+    ) +
+    # geom_vline(xintercept = c(-1, 1), lty = 2) +
+    # geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    # geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
+    scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
 ```
 
 ```{r}
@@ -727,8 +735,8 @@ sim_h0 %>%
       title = "Distribution of the t-statistic",
       x = "Values of the t-statistic"
     ) +
-    # geom_vline(xintercept = c(-1, 1), lty = 2) +
-    # geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    geom_vline(xintercept = c(-1, 1), lty = 2) +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
     geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
     scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
 ```
@@ -736,28 +744,51 @@ sim_h0 %>%
 ```{r}
 sum(sim_h0$statistic < -1) + sum(sim_h0$statistic > 1)
 ```
-670 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
+655 samples (out of 2000 samples) gave a value of the t-statistic less than -1 or greater than +1.
 
 ```{r}
-670 / 2000
+655 / 2000
 ```
 ```{r}
 sum(sim_h0$statistic < -2) + sum(sim_h0$statistic > 2)
 ```
 ```{r}
-79 / 2000
+112 / 2000
 ```
+```{r}
+## y = 77.5 + 0 x + e
+number_of_samples <- 2000
+sample_size <- nrow(kids)
 
+sim_h1 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    kid_score = 77.54839 + 10 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+```
 
 ```{r}
-summary(sim_h0$statistic)
-quantile(sim_h0$statistic, prob = c(0.025, 0.25, 0.5, 0.75, 0.975))
+sim_h1 %>%
+  ggplot(aes(x = statistic)) +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      title = "Distribution of the t-statistic (beta = 10)",
+      x = "Values of the t-statistic"
+    ) +
+    # geom_vline(xintercept = c(-1, 1), lty = 2) +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
+    scale_x_continuous(breaks = c(-2, -1, 0, 1, 2))
 ```
-
-```{r}
-qt(0.025, df = nrow(kids) - 2)
-```
-
 
 ## t-distribution
 
@@ -774,7 +805,6 @@ sim_h0 %>%
     ) 
 ```
 
-
 ```{r}
 td_sim <- data.frame(
   x = seq(-4, 4)
@@ -787,6 +817,20 @@ td_sim %>%
   stat_function(fun = dt, n = 101, args = list(df = 10), colour = "steelblue", lty = 2)
 ```
 
+Critical values derived from the t-distribution
+
+```{r}
+
+## The degrees of freedom equal the number of observations minus the number of model coefficients
+
+## At 95% significance level
+qt(0.05 / 2, df = nrow(kids) - 2)
+qt(1 - 0.05 / 2, df = nrow(kids) - 2)
+
+## At 99% significance level
+qt(0.01 / 2, df = nrow(kids) - 2)
+qt(1 - 0.01 / 2, df = nrow(kids) - 2)
+```
 
 
 <!-- Plot the distributions of scores for each simulated sample -->
