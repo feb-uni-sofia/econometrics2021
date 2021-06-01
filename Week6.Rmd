@@ -38,14 +38,17 @@ During World war 2 combat aviation played a crucial role but also suffered heavy
 
 
 ![Bullet holes locations (histogram)](https://alearningadayblog.files.wordpress.com/2018/06/bombers.jpeg)
+
 ![fsdf](https://riskwerk.files.wordpress.com/2016/11/abraham-wald1.png)
+
 # Two continuous predictors
 
 ```{r}
 library(tidyverse)
 library(patchwork)
 
-crime <- read_tsv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/crime.csv")
+crime <- read_tsv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/crime.csv") %>%
+  select(-I)
 ```
 
 
@@ -101,20 +104,49 @@ summary(fit)
 
 Estimated equation:
 
+$\hat{C}$: expected crime rate
+
 $$
-\underbrace{C_i}_{Crime} = -50.8 + 1.48 \underbrace{\text{HS}_i}_{\text{Share of persons with high school degree}}
+\hat{C}_i = -50.8 + 1.48 \text{HS}_i
 $$
-Interpretation: comparing two counties: that differ by 1 percentage point on HS we expect the county with the higher HS to have 1.48 crimes
-more for 100,000 inhabitants.
+
+$$
+\hat{C}_{HS = 80} - \hat{C}_{HS = 79} = -50.8 + 1.48 \times 80 - (-50.8 + 1.48 \times 79) = 1.48\times(80 - 79) = 1.48
+$$
+
+- `C`: number of crimes per 100,000 inhabitants
+- `HS`: share of high school graduates
+- `U`: share of persons living in urban areas
+
+Interpretation: comparing two counties: that differ by 1 percentage point on HS we expect the county with the higher HS to have 1.48 crimes more for 100,000 inhabitants.
+
+
 
 $$
 \underbrace{C_i}_{Crime} = \alpha + \beta \underbrace{\text{U}_i}_{\text{Share of persons in urban areas}} + e_i
 $$
 
+
 ```{r}
 fit_U <- lm(C ~ U, data = crime)
 summary(fit_U)
 ```
+
+$$
+\hat{C}_i = 24.5 + 0.56 U_i
+$$
+
+Interpretation: counties that differ by one percentage point (the unit of U) on U are expected to differ by 0.56 cimes per 100,000 inhabitants. Counties with higher degree of urbanisation are expected to have higher crime rates.
+
+
+```{r}
+crime %>%
+  select(C, HS, U) %>%
+  pairs()
+```
+
+
+
 $$
 C_i = \alpha + \beta_1 \text{HS}_i  + \beta_2 \text{U}_i + e_i
 $$
@@ -124,9 +156,7 @@ fit_U_HS <- lm(C ~ HS + U, data = crime)
 summary(fit_U_HS)
 ```
 
+$$
+\hat{C}_i = 59.1 -0.58 \text{HS}_i  + 0.68 \text{U}_i
+$$
 
-```{r}
-crime %>%
-  select(C, HS, U) %>%
-  pairs()
-```
