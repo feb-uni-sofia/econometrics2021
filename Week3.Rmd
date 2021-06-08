@@ -10,18 +10,16 @@ library(tidyverse)
 
 ## Install the tidymodels package (again, as with any other package you need to install in only once)
 ## install.packages("tidymodels")
-library(tidymodels)
+# library(tidymodels)
 ```
 
 ```{r}
 ## Load the data
-earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv")
+earnings <- read.csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/earnings.csv") %>%
+  mutate(
+    height_cm = 2.54 * height
+  )
 ```
-
-
-# Sampling
-
-Sample: a subset of a population.
 
 ```{r}
 population <- earnings %>%
@@ -32,27 +30,69 @@ population <- earnings %>%
   select(person_id, height_cm)
 
 sample1 <- population %>%
-  slice_sample(n = 200)
+  slice_sample(n = 2)
+
+## True population mean (in reality it is unknown)
+mean(earnings$height_cm)
+
+
+## 169 cm average height in earnings population
 
 mean(sample1$height_cm)
+abs(mean(sample1$height_cm) - 169) ## абсолютна стойност |x|
 ```
+
+$$
+i = 1,\ldots,n \text{ (sample size)}\\
+y_i: \text{ height of person } i\\
+\bar{y} = \frac{1}{n}\sum_{i = 1}^{n}y_i \text{ sample mean}
+$$
+
+
+$$
+\text{Model 1: Intercept only model}: \\
+y_1, y_2, \ldots, y_n\\
+y_i = \mu + \epsilon_i\\
+\epsilon_i \sim N(0, \sigma^2)\\ \implies
+y_i \sim Normal(\mu, \sigma^2)
+$$
+
+For this model we can estimate $\mu$ by using the sample mean and we can estimate $\sigma^2$ by using the sample variance.
+
+$$
+E(y_i) = ?
+$$
+
+```{r}
+## lm: (linear model)
+fit <- lm(height_cm ~ 1, data = sample1)
+mean(sample1$height_cm)
+summary(fit)
+```
+
+$$
+\text{Estimated model:}\\
+\hat{y}_i = \hat{\mu} = 170.2
+$$
+
+
+## Linear regression models
 
 
 ## Uniform distribution
 
 
 ```{r}
-x <- runif(4, min = -1, max = 1)
+x <- runif(32, min = -1, max = 1)
 x ## Result of every single game
 cumsum(x) ## Running total, cumulative sum
-
 ```
-
 
 Select values at random in some interval [a, b].
 
 ```{r}
-N_draws <- 2
+## Code for illustration only
+N_draws <- 1000
 ## 1e5 = 100,000
 
 df_unif <- data.frame(
@@ -78,8 +118,14 @@ ggplot(df_unif, aes(x = x)) +
       title = "Histogram"
     )
 ```
+
 ## Sampling from standard distribution
 
+```{r}
+x <- runif(4, -1, 1)
+x
+cumsum(x)
+```
 
 ```{r, echo=FALSE}
 ## Code for illustration only
@@ -89,7 +135,7 @@ ggplot(df_unif, aes(x = x)) +
 # set.seed(2)
 
 
-N_pers <- 100
+N_pers <- 1000
 N_steps <- 32
 
 positions_game <- expand_grid(
@@ -130,7 +176,9 @@ positions_game %>%
         color = "firebrick2") +
       geom_vline(
         xintercept = c(4, 8, 16, 32),
-        linetype = 2, size = 1 / 6)
+        linetype = 2, size = 1 / 6) +
+      geom_hline(yintercept = 5, lty = 2) + 
+      geom_hline(yintercept = -5, lty = 2)
 ```
 
 ```{r, echo=FALSE}
@@ -219,4 +267,10 @@ dt %>%
 ```
 
 
+# Sampling
+
+Sample: a subset of a population.
+
+Хонорар: 10,000,000
+1,000,000 за всеки сантиметър грешка (отклонение нагоре или надолу от истинското средно)
 

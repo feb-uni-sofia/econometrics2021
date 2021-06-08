@@ -146,6 +146,9 @@ ggplot(data = invoices, aes(x = Invoices, y = Time)) +
     aes(xend = Invoices, yend = y_predicted_1),
     size = 1 / 4
   ) +
+  # geom_point(data = data.frame(x = c(201, 201), y = c(4.5, 2)), aes(x = x, y = y), shape = 1) +
+  # geom_segment(data = data.frame(x = c(201, 201), y = c(4.5, 2)),
+  #              aes(x = x, y = y, xend = 201, yend = 0.1 + 0.015 * 201), lty=2) +
   geom_abline(intercept = 0.1, slope = 0.015, color = "steelblue")
 ```
 How to aggregate each individual deviation (residual)? One possible approach is to simply sum the deviations

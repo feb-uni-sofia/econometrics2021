@@ -39,6 +39,7 @@ During World war 2 combat aviation played a crucial role but also suffered heavy
 
 ![Bullet holes locations (histogram)](https://alearningadayblog.files.wordpress.com/2018/06/bombers.jpeg)
 
+
 ![fsdf](https://riskwerk.files.wordpress.com/2016/11/abraham-wald1.png)
 
 # Two continuous predictors
@@ -50,6 +51,12 @@ library(patchwork)
 crime <- read_tsv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/crime.csv") %>%
   select(-I)
 ```
+
+Variables description:
+
+- `C`: number of crimes per 100,000 inhabitants
+- `HS`: share of high school graduates
+- `U`: share of persons living in urban areas
 
 
 ```{r}
@@ -92,6 +99,7 @@ p2 <- florida_crime %>%
 p1 + p2
 ```
 
+
 $$
 \underbrace{C_i}_{Crime} = \alpha + \beta \underbrace{\text{HS}_i}_{\text{Share of persons with high school degree}} + e_i
 $$
@@ -106,24 +114,124 @@ Estimated equation:
 
 $\hat{C}$: expected crime rate
 
+
 $$
 \hat{C}_i = -50.8 + 1.48 \text{HS}_i
 $$
 
 $$
+\hat{C}_i[\text{number of crimes}] = -50.8[\text{number of crimes}] + 1.48 \left[\frac{\text{number of crimes}}{\text{percentage points}}\right]\text{HS}_i[\text{percentage points}]
+$$
+
+
+$$
+\hat{C}_{HS = 80}  = -50.8 + 1.48 \times 80\\
+\hat{C}_{HS = 79}  = -50.8 + 1.48 \times 79\\
 \hat{C}_{HS = 80} - \hat{C}_{HS = 79} = -50.8 + 1.48 \times 80 - (-50.8 + 1.48 \times 79) = 1.48\times(80 - 79) = 1.48
 $$
 
-- `C`: number of crimes per 100,000 inhabitants
-- `HS`: share of high school graduates
-- `U`: share of persons living in urban areas
 
-Interpretation: comparing two counties: that differ by 1 percentage point on HS we expect the county with the higher HS to have 1.48 crimes more for 100,000 inhabitants.
 
+Interpretation (slope): comparing two counties: that differ by 1 percentage point on HS we expect the county with the higher HS to have 1.48 crimes more for 100,000 inhabitants.
+
+Interpretation (intercept):
+
+$$
+\hat{C}_{HS} = -50.8 + 1.48 HS\\
+\hat{C}_{HS = 0} = -50.8
+$$
+
+$$
+f(x) = -50.8 + 1.48x\\
+f(0) = -50.8
+$$
+
+$$
+\overline{HS} = \frac{1}{n}\sum_{i = 1}^{n} HS_i\\
+C_i = \alpha + \beta (\text{HS}_i - \overline{HS}) + e_i\\
+$$
+```{r}
+crime %>%
+  ggplot(aes(x = HS, y = C)) +
+    geom_point() + 
+    geom_smooth(method = "lm") +
+    geom_abline(intercept = -50.8, slope = 1.48) +
+    labs(
+      x = "HS: Percentage of persons with high school degree",
+      y = "C: Crime rate"
+    ) +
+    scale_x_continuous(breaks = c(55, 60, 70, 80, 85)) +
+    xlim(c(0, 90)) +
+    ylim(c(-55, 140))  +
+     geom_vline(xintercept = 0, lty = 2) +
+     geom_vline(xintercept = 69.49, lty = 2)
+```
+
+```{r}
+## Average value of HS: 69.48 percent
+mean(crime$HS)
+
+crime <- crime %>%
+  mutate(
+    HS_centered = HS - mean(HS)
+  )
+```
+
+```{r}
+fit_HS_centered <- lm(C ~ HS_centered, data = crime)
+summary(fit_HS_centered)
+
+# summary(crime$HS)
+# summary(crime$HS_centered)
+```
+
+$$
+\hat{C}_i = 52.4 + 1.48 (HS_i - \overline{HS})\\
+\hat{C}_i = 52.4 + 1.48 (HS_i - 69.48)\\
+$$
+
+$$
+\hat{C}_{HS = \overline{HS}} = 52.4
+$$
+Expected crime rate in a county with the average share of high school graduates.
 
 
 $$
 \underbrace{C_i}_{Crime} = \alpha + \beta \underbrace{\text{U}_i}_{\text{Share of persons in urban areas}} + e_i
+$$
+
+Predictions:
+
+```{r}
+## Prediction with the original model C ~ HS
+newdata_hs0 <- data.frame(HS = 0)
+# ?predict.lm
+predict(fit, newdata = newdata_hs0, se.fit = TRUE)
+```
+
+$$
+\hat{C}_{HS} = -50.85 + 1.48 HS\\
+\hat{C}_{HS = 0} = -50.85
+$$
+
+
+```{r}
+## Average HS = 69.49
+predict(fit, newdata = data.frame(HS = 69.49), se.fit = TRUE)
+```
+
+$$
+\hat{C}_{HS = \overline{HS}} = 52.40365
+$$
+
+```{r}
+newdata_multiple_values <- data.frame(HS = c(40, 50, 69, 80, 100))
+# newdata_multiple_values <- data.frame(HS = c(69))
+predict(fit, newdata = newdata_multiple_values, se.fit = TRUE, interval = "confidence")
+```
+
+$$
+\hat{C}_{HS = 100} = 97.74081
 $$
 
 
@@ -154,6 +262,10 @@ $$
 ```{r}
 fit_U_HS <- lm(C ~ HS + U, data = crime)
 summary(fit_U_HS)
+```
+
+```{r}
+ 
 ```
 
 $$

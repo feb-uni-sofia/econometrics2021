@@ -623,6 +623,13 @@ sd(sim_2$estimate)
 
 ## Hypothesis tests
 
+Simple linear regression model:
+
+$$
+y_i = \alpha + \beta x_i + e_i, e_i \sim N(0, \sigma^2)
+$$
+
+
 ### t-tests
 
 $$
@@ -751,11 +758,14 @@ sum(sim_h0$statistic < -1) + sum(sim_h0$statistic > 1)
 ```{r}
 624 / 2000
 ```
+
 ```{r}
-sum(sim_h0$statistic < -2) + sum(sim_h0$statistic > 2)
+sum(sim_h0$statistic < -2) 
+sum(sim_h0$statistic > 2)
 ```
+
 ```{r}
-90 / 2000
+52 / 2000
 ```
 ```{r}
 ## y = 77.5 + 0 x + e
@@ -800,31 +810,53 @@ p is the number of coefficients in the model. In our example $p = 2$ (one coeffi
 ```{r}
 sim_h0 %>%
   ggplot(aes(x = statistic)) +
-    geom_density(color = "steelblue4") +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      title = "Distribution the t-statistic (beta = 0)",
+      x = "Values of the t-statistic"
+    ) +
+    geom_vline(xintercept = c(-1, 1), lty = 2) +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
+    scale_x_continuous(breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4))
+```
+
+```{r}
+sim_h0 %>%
+  ggplot(aes(x = statistic)) +
+    # geom_density(color = "steelblue4") +
     stat_function(fun = dt, n = 101, args = list(df = nrow(kids) - 2)) +
     labs(
       x = "t-statistic"
-    ) + 
-    geom_vline(xintercept = c(-1.96, 1.96)) +
-    geom_vline(xintercept = c(-1.648388, 1.648388), lty = 2) +
-    geom_vline(xintercept = c(-2.587258, 2.587258), lty = 2)
-
-    
+    ) +
+    # geom_vline(xintercept = c(-2, 2), lty = 2)
+    geom_vline(xintercept = c(-1.965471, 1.965471), lty = 2) +
+    # geom_vline(xintercept = c(-1.648388, 1.648388), lty = 2) +
+    # geom_vline(xintercept = c(-2.587258, 2.587258), lty = 2) +
+    scale_x_continuous(breaks = c(-1.96, 1.96))
 ```
+
 ```{r}
 # p (probability) t( t-distribution)
 ## Degrees of freedom
 
-pt(-1.965, df = 434 - 2)
+pt(-1.965471, df = 434 - 2)
+
+1 - pt(2, df = 434 - 2)
+
+2 * pt(-2, df = 434 - 2)
+2 * pt(-1.965471, df = 434 - 2)
 
 # q (qantile) t(t-distribution)
 # Convention: alpha = 0.05
+# 0.025 = 0.05 / 2
 qt(0.025, df = 434 - 2)
-pt(-1.965471, df = 434 - 2)
+# 1 - 0.025 = 1 - 0.05 / 2
+qt(1 - 0.025, df = 434 - 2)
 
-qt(0.975, df = 434 - 2)
-
-alpha <- 0.01
+alpha <- 0.05
 
 qt(alpha / 2, df = 434 - 2)
 qt(1 - alpha / 2, df = 434 - 2)

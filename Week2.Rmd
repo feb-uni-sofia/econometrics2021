@@ -212,6 +212,7 @@ cov(earnings$height, earnings$weight, use = "complete.obs")
 ```{r}
 cov(earnings$height_cm, 1000 * earnings$weight_kg, use = "complete.obs")
 ```
+
 $$
 \text{Room area: }
 2[m] \times 5[m] = 10[m \times m = m^2]

@@ -8,6 +8,9 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(broom)
+library(patchwork)
+
+## install.packages("patchwork")
 ## install.packages("broom")
 kids <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2020-solutions/master/data/childiq.csv") %>% select(kid_score, mom_hs)
 ```
@@ -357,19 +360,10 @@ We begin by introducing the `group_by` function and we'll use it to compute the 
 kids %>% 
   group_by(mom_hs) %>%
   summarise(
-    "Group size" = n(),
-    "Average" = mean(kid_score)
+    "Gruppengröße" = n(),
+    "Mittelwert" = mean(kid_score)
   )
 ```
-
-Next we calculate the _sample_ standard deviation of the IQ test scores (`kid_score`) and for now we will use this value for the standard deviation of the random terms $e_i$.
-
-```{r}
-## Estimate the standard deviation of the IQ scores (for all groups)
-## so that we can base our simulation on a plausible value
-sd(kids$kid_score)
-```
-
 
 Next we construct a data set using `expand_grid` to replicate the `mom_hs` column $R = 2000$ times.
 
@@ -394,8 +388,19 @@ sim_df <- sim_df %>%
     ## rnorm adds a value selected at random from a normal distribution with mean = 0 and standard
     ## deviation (sigma) = 20.41 (that we estimated from the sample)
     e = rnorm(2000 * 434, mean = 0, sd = 19.85),
-    kid_score = 77.54839 + 11.77 * mom_hs + e
+    kid_score = 77.55 + 11.77 * mom_hs + e
   )
+```
+
+```{r}
+stichprobe1 <- sim_df %>% filter(R == 1)
+lm(kid_score ~ mom_hs, data = stichprobe1)
+head(stichprobe1)
+```
+```{r}
+stichprobe2 <- sim_df %>% filter(R == 2)
+tidy(lm(kid_score ~ mom_hs, data = stichprobe2))
+head(stichprobe2)
 ```
 
 The last step completes the simulation of our 2000 samples and we can start estimating the regression model in each sample. For that we group the simulation data set `sim_df` by the simulation number (variable $R$) and run the regression model in every group. The `tidy` function serves to transform the output of `lm` into a format that can easily fit into a rectangular table.
@@ -410,39 +415,28 @@ sim_coeff <- sim_df %>%
 ```
 E.g. `lm` result for the first sample
 
-```{r}
-fit <- lm(kid_score ~ mom_hs, data = sim_df %>% filter(R == 2))
-fit
-tidy(fit)
-```
-
-
 
 The data set `sim_coeff` now contains estimated coefficients ($\hat{\alpha}$ and $\hat{\beta}$) for every sample. To plot the distribution of $\hat{\beta}}$ we filter the data set so that we keep only the raw where `term == "mom_hs"` (i.e our estimates for $\beta$).
 
 ```{r}
-slopes <- sim_coeff %>%
-  filter(term == "mom_hs")
+steigungskoeff <- sim_coeff %>% filter(term == "mom_hs") %>% select(R, estimate)
 
-slopes %>%
-  ggplot(aes(x = estimate)) + 
-  geom_density()
-```
-
-```{r}
-slopes %>%
+steigungskoeff %>%
   ggplot(aes(x = estimate)) + 
   geom_boxplot() +
   labs(
-    x = "beta_hat",
-    title = "Beta_hat distribution (over 2000 samples)"
-  )
+    x = "Schätzungen für beta",
+    title = "Verteilung der Schätzungen für beta (2000 Stichproben)"
+  ) + 
+  geom_vline(xintercept = 11.77)
 ```
+
 ```{r}
-summary(slopes$estimate)
+summary(steigungskoeff$estimate)
 ```
+
 ```{r}
-sd(slopes$estimate)
+sd(steigungskoeff$estimate)
 ```
 
 
@@ -473,9 +467,9 @@ Finally, we can plot the regression lines for each sample.
 
 ```{r}
 sim_coeff_wide %>%
-  filter(R < 1000) %>%
+  filter(R < 1500) %>%
   ggplot() + 
-    geom_abline(aes(intercept = alpha, slope = beta, group = R), alpha = 0.1, size = 1 / 5) + 
+    geom_abline(aes(intercept = alpha, slope = beta, group = R), alpha = 0.2, size = 1 / 5) + 
     ## Set the limits of x-axis
     xlim(c(0, 1)) +
     ## Set the limits of y-axis
@@ -491,35 +485,313 @@ fit <- lm(kid_score ~ mom_hs, data = kids)
 fit
 summary(fit)
 ```
-- Estimate: $\hat{\alpha}$, $\hat{\beta}$
-- Standard error of the estimate is the standard deviation of the estimator for the coefficient.
+- 1. Spalte: geschätzte Koeffizienten: $\hat{\alpha}$, $\hat{\beta}$
+- 2. Spalte: Standardfehler der Koeffizientenschätzer. Standardfehler ist die Standardabweichung der Verteilung der Schätzungen der Koeffizienten.
 
 ```{r}
-summary(slopes$estimate)
-sd(slopes$estimate)
+sd(steigungskoeff$estimate)
 ```
 
 ```{r}
-## Standard deviation
+## Berechnung der Standardabweichung mit Zahlenwerten 
+sd(c(0, 2, 20, 200))
 sd(c(1, 2, 3, 4))
 sd(c(1, 1, 1, 3))
 sd(c(1, 1, 1, 1))
-sd(11.771)
+# sd(11.771)
+```
+## Standardfehler von $\hat{\beta}$
+
+Laßt uns die Verteilung von $\hat{\beta}$ unter zwei verschiedenen Simulationen vergleichen. Die zwei Simulationen unterscheiden sich nur durch den Wert von $\sigma$. In der ersten Simulation setzen wir $\sigma = 19.85$ und in der zweiten Simulation setzen wir $\sigma = 40$.
+
+```{r}
+## Der Code für die Simulation, nur kompakt geschrieben
+## y = 77.5 + 0 x + e
+number_of_samples <- 2000
+sample_size <- nrow(kids)
+
+sim_1 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    kid_score = 77.54839 + 11.77 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+
+sim_2 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 40),
+    kid_score = 77.54839 + 11.77 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+```
+
+```{r}
+p1 <- sim_1 %>%
+  ggplot(aes(x = estimate, y = 0)) +
+    geom_boxplot() +
+    geom_point(position = "jitter", size = 1/3, alpha = 0.2) +
+    xlim(c(-5, 30)) +
+    labs(
+      x = "Estimate for beta",
+      y = "",
+      title = "sigma = 19.85"
+    ) +
+  scale_y_continuous(breaks = NULL)
+p2 <- sim_2 %>%
+  ggplot(aes(x = estimate, y = 0)) +
+    geom_boxplot() +
+    geom_point(position = "jitter", size = 1/3, alpha = 0.2) +
+    xlim(c(-5, 30)) +
+    labs(
+        x = "Beta Hut",
+        y = "",
+        title = "sigma = 40"
+      ) +
+    scale_y_continuous(breaks = NULL)
+
+p1 + p2
+```
+
+```{r}
+sd(sim_1$estimate)
+sd(sim_2$estimate)
 ```
 
 
-<!-- Plot the distributions of scores for each simulated sample -->
-<!-- ```{r} -->
-<!-- sim_df %>% -->
-<!--   filter(R < 50) %>% -->
-<!--   ggplot( -->
-<!--     aes( -->
-<!--       x = kid_score,  -->
-<!--       group = interaction(R, mom_hs), -->
-<!--       colour = factor(mom_hs) -->
-<!--       ) -->
-<!--     ) + -->
-<!--   geom_density( -->
-<!--     size = 1/5 -->
-<!--   ) -->
-<!-- ``` -->
+## T-tests
+
+$$
+H_0: \beta = 0\\
+H_1: \beta \neq 0
+$$
+
+$$
+y_i = \alpha + \beta x_i + e_i\\
+\beta = 0 \implies y_i = \alpha + e_i
+$$
+
+Die Aussage $\beta = 0$ bedutet... ?
+
+$$
+\beta_0 \iff  \mu_1 = \mu_0
+$$
+
+Wir fassen die Stichprobe mit der t-Statistik zusammen.
+
+$$
+t = \frac{\hat{\beta} - 0}{\hat{SE}(\hat{\beta})}
+$$
+
+$t$ grows with the difference between $\hat{\beta}$ and $0$ and it grows with decreasing
+standard error.
+
+$$
+t = \frac{11.77}{2.322} = 5.069
+$$
+
+## Mögliche Fehlentscheidungen
+
+```{r}
+## Code for illustration only
+table_data <- expand_grid(
+  Reality = c("Schuldig", "Nicht schuldig"),
+  Decision = c("Verurteilen", "Nicht verurteilen")
+) %>%
+  mutate(
+    Error = c("-", "Eine schuldige Person freisprechen", "Eine unschuldige Person verurteilen", "-")
+  )
+
+table_data %>% 
+  knitr::kable() %>%
+  kableExtra::kable_styling()
+```
+
+```{r}
+## Code for illustration only
+table_data_h0 <- expand_grid(
+  H0 = c("Wahr", "Falsch"),
+  Decision = c("Nicht verwerfen", "Verwerfen")
+) %>%
+  mutate(
+    Error = c("-", "Eine wahre Hypothese verwerfen", "Eine falsche Hypothese nicht verwerfen", "-")
+  )
+
+table_data_h0 %>% 
+  knitr::kable() %>%
+  kableExtra::kable_styling()
+```
+
+## Stichprobenverteilung von $\hat{\beta}$ und von der t-Statistik under $H_0$
+
+$$
+\text{kid_score}_i = 77.55 + \underbrace{\beta}_{ = 0} \text{mom_hs}_i + e_i
+$$
+
+```{r}
+
+number_of_samples <- 2000
+sample_size <- nrow(kids)
+
+sim_h0 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    ## y = 77.5 + 0 x + e
+    kid_score = 77.54839 + 0 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+```
+
+
+```{r}
+sim_h0 %>%
+  ggplot(aes(x = estimate)) +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      title = "Stichprobenverteilung von beta Hut (unter beta = 0)",
+      x = "Beta Hut"
+    ) +
+    # geom_vline(xintercept = c(-1, 1), lty = 2) +
+    # geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    # geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
+    scale_x_continuous(breaks = c(-7, -5, -2, -1, 0, 1, 2, 5, 7))
+```
+
+```{r}
+sim_h0 %>%
+  ggplot(aes(x = statistic)) +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 2) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      title = "Stichprobenverteilung der t-statistic (unter beta = 0)",
+      x = "t-statistic"
+    ) +
+    geom_vline(xintercept = c(-1, 1), lty = 2) +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4") +
+    # geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue") +
+    scale_x_continuous(breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4))
+```
+
+```{r}
+sum(sim_h0$statistic < -1) + sum(sim_h0$statistic > 1)
+```
+594 Stichproben (aus 2000 Stichproben) ergaben einen Wert der t-Statistik, der kleiner als -1 oder größer als +1 was.
+
+```{r}
+594 / 2000
+```
+
+```{r}
+sum(sim_h0$statistic < -2) + sum(sim_h0$statistic > 2)
+```
+
+```{r}
+94 / 2000
+```
+
+```{r}
+number_of_samples <- 2000
+sample_size <- nrow(kids)
+
+sim_h1 <- expand_grid(
+    R = 1:number_of_samples,
+    mom_hs = kids$mom_hs
+  ) %>%
+  mutate(
+    e = rnorm(number_of_samples * sample_size, mean = 0, sd = 19.85),
+    ## y = 77.5 + 10x + e
+    kid_score = 77.54839 + 10 * mom_hs + e
+  ) %>%
+  group_by(R) %>%
+  do(tidy(lm(kid_score ~ mom_hs, data = .))) %>%
+  select(R, term, estimate, statistic) %>%
+  filter(term == "mom_hs")
+```
+
+```{r}
+sim_h1 %>%
+  ggplot(aes(x = statistic)) +
+    geom_boxplot() +
+    geom_point(aes(y = 0), position = "jitter", alpha = 0.2, size = 1 / 3) +
+    geom_vline(xintercept = 0, colour = "firebrick4") +
+    labs(
+      title = "Distribution of the t-statistic (beta = 10)",
+      x = "Values of the t-statistic"
+    ) +
+    # geom_vline(xintercept = c(-1, 1), lty = 2) +
+    geom_vline(xintercept = c(-2, 2), lty = 2, colour = "firebrick4", lwd = 1.5) +
+    geom_vline(xintercept = c(-4, 4), lty = 2, colour = "steelblue", lwd = 1.5) +
+    scale_x_continuous(breaks = c(-4, -2, -1, 0, 1, 2, 4))
+```
+
+## t-distribution
+
+If the null hypothesis is true the t-statistic follows a t-distribution with $n - p$ degrees of freedoms, where
+p is the number of coefficients in the model. In our example $p = 2$ (one coefficient for the intercept and another coefficient for the slope).
+
+```{r}
+sim_h0 %>%
+  ggplot(aes(x = statistic)) +
+    geom_density(color = "steelblue4") +
+    stat_function(fun = dt, n = 101, args = list(df = nrow(kids) - 2)) +
+    labs(
+      x = "t-statistic"
+    )
+```
+```{r}
+## t-distribution hat ein Parameter: Freiheitsgrade (degrees of freedom)
+
+pt(-1.96, df = 434 - 2)
+1 - pt(1.96, df = 434 - 2)
+```
+
+
+
+```{r}
+## The degrees of freedom equal the number of observations minus the number of model coefficients
+## For the kids dataset df = 434 (observations) - 2 (coefficients: alpha: Intercept, beta: coefficient of mom_hs)
+
+## At 95% significance level
+## q: quantile, t: t-distribution: computes a value of x such that the probability P(T < x) = p
+qt(0.025, df = 434 - 2)
+qt(0.975, df = 434 - 2)
+
+## At 99% significance level
+qt(0.01 / 2, df = nrow(kids) - 2)
+qt(1 - 0.01 / 2, df = nrow(kids) - 2)
+```
+
+
+```{r}
+td_sim <- data.frame(
+  x = seq(-4, 4)
+)
+
+td_sim %>%
+  ggplot(aes(x = x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1), colour = "firebrick") +
+  stat_function(fun = dt, n = 101, args = list(df = 1), colour = "steelblue") +
+  stat_function(fun = dt, n = 101, args = list(df = 10), colour = "steelblue", lty = 2)
+```
+
+Critical values derived from the t-distribution
