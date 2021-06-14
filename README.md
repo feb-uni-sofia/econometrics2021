@@ -22,6 +22,8 @@ Homework 0: [https://classroom.github.com/g/AgP6lrPG](https://classroom.github.c
 
 Homework 1: [https://classroom.github.com/g/py3GnxFj](https://classroom.github.com/g/py3GnxFj), due Apr 20, 2021, 11:00.
 
+Homework 2: [https://classroom.github.com/g/wRii0IHe](https://classroom.github.com/g/wRii0IHe), due June 17, 2021. 19:00.
+
 ## Grading
 
 The final grade will be based on a homework project after the end of the term. The homeworks during the term are _not_ mandatory.
