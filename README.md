@@ -19,10 +19,16 @@ All classes will follow the same material, so you can choose any one of these da
 
 Homework 0: [https://classroom.github.com/g/AgP6lrPG](https://classroom.github.com/g/AgP6lrPG)
 
-
 Homework 1: [https://classroom.github.com/g/py3GnxFj](https://classroom.github.com/g/py3GnxFj), due Apr 20, 2021, 11:00.
 
 Homework 2: [https://classroom.github.com/g/wRii0IHe](https://classroom.github.com/g/wRii0IHe), due June 17, 2021. 19:00.
+
+## Final homework
+
+Homework assignment link: [https://classroom.github.com/g/W-q2A5de](https://classroom.github.com/g/W-q2A5de), due June 30, 2021 
+
+When you register for the final homework your repository will be empty. Please register for the homework until Monday, June 21. After that I will upload your teams assignment into that repository.
+
 
 ## Grading
 
