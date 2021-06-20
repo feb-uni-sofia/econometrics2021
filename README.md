@@ -19,9 +19,9 @@ All classes will follow the same material, so you can choose any one of these da
 
 Homework 0: [https://classroom.github.com/g/AgP6lrPG](https://classroom.github.com/g/AgP6lrPG)
 
-Homework 1: [https://classroom.github.com/g/py3GnxFj](https://classroom.github.com/g/py3GnxFj), due Apr 20, 2021, 11:00.
+Homework 1: [https://classroom.github.com/g/py3GnxFj](https://classroom.github.com/g/py3GnxFj), due Apr 20, 2021, 11:00. See the sample solution [here](https://github.com/feb-uni-sofia/econometrics2021/blob/main/Homework1.Rmd).
 
-Homework 2: [https://classroom.github.com/g/wRii0IHe](https://classroom.github.com/g/wRii0IHe), due June 17, 2021. 19:00.
+Homework 2: [https://classroom.github.com/g/wRii0IHe](https://classroom.github.com/g/wRii0IHe), due June 17, 2021. 19:00. See the sample solution [here](https://github.com/feb-uni-sofia/econometrics2021/blob/main/Homework2.Rmd).
 
 ## Final homework
 
