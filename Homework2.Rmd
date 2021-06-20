@@ -1,0 +1,271 @@
+---
+title: "Homework 2"
+subtitle: "Sample solution"
+author: "Boyko Amarov"
+date: "4/19/2021"
+output:
+  bookdown::html_document2: default
+---
+
+# Homework 2
+
+- Please write your answers beneath each question and please do not remove the questions from your solution
+- Please use the code chunks to write your code
+- Make sure that your solution compiles to HTML without errors.
+- Copy-paste your solution into the same file from which you downloaded the questions. Please do not create new files in the github repository.
+
+
+> NOTE that the use of Latex math syntax is not required for your solution.
+
+> NOTE that figure captions and references are not required for your solution. Here they are used for
+> better readibility.
+
+```{r}
+library(tidyverse)
+
+wines <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/wines2012.csv")
+marriage <- read_csv("https://raw.githubusercontent.com/feb-uni-sofia/econometrics2021/main/data/marriage.csv")
+```
+
+
+## Problem 1
+
+The data set `wines` contains scores assigned to 180 wines by several judges.
+
+Variables description:
+  
+- `score` (numeric): The score assigned to wine i
+- `judge.amer` (numeric): Equals 1 if the judge is American and is 0 otherwise.
+
+```{r}
+glimpse(wines)
+```
+1. Fit the following linear model using the `lm` function.
+
+$$
+  \text{score}_i = \alpha + \beta \text{judge.amer}_i + e_i, \quad e_i \sim N(0, \sigma^2)
+$$
+
+
+```{r}
+## Fit the model here.
+
+fit_wines <- lm(score ~ judge.amer, data = wines)
+summary(fit_wines)
+```
+2. What is the meaning of the coefficients $\alpha$ and $\beta$?
+
+The constant in the model ($\alpha$) is the expected wine score from Non-American judges (`judge.amer = 0`). 
+The slope ($\beta$) is the difference between the expected scores from American (`judge.amer = 1`) and Non-American judges (`judge.amer = 0`). In the sample the estimates are $\hat{\alpha} = 13.83$: the sample average score from Non-American judges and $\hat{\beta} = 0.66$: the difference between the sample average scores from American and Non-American judges.
+
+
+3. Test the null hypothesis against a two-sided alternative that there is no systematic difference between the scores assigned by American and by Non-American judges. Two-sided alternative means that you would reject for both large negative and large positive values of the t-statistic.
+
+- Formulate the hypothesis in terms of the model coefficients.
+
+$$
+H_0: \beta = 0\\
+H_1: \beta \neq 0
+$$
+_Hint_: the use of Latex syntax for math is _not_ required for your solution, you can write it in any way as long as it is understandable.
+
+- Write down the value of the t-statistic 
+- Decide whether to reject the null hypothesis at both 5% and 10% significance levels (probability of rejection of a true null hypothesis) and explain your decision. Hint: compute the critical values using the `qt` function.
+
+
+The value of the t-statistic is 1.669 (from the lm summary). The model has two coefficients, therefore the degrees of freedom of the distribution of the t-statistic are $n - p = 180 - 2 = 178$. Using the `qt` function the critical values at both significance levels are:
+
+```{r}
+## At 5% significance level
+qt(0.0275,df=176)
+qt(0.975,df=176)
+```
+
+```{r}
+## At 10% significance level
+qt(0.05,df=176)
+qt(0.95,df=176)
+```
+
+At the 5% level of significance the null hypothesis cannot be rejected, because the value of the t-statistic (1.669) is
+between the two critical values $(-1.93, +1.93)$.
+
+
+At 10% significance level the null hypothesis should be rejected, because the value of the t-statistic (1.669) is greater than the upper critical value (1.65).
+
+
+
+## Problem 2
+
+```{r}
+glimpse(marriage)
+```
+
+The dataset `marriage` contains information about marriage and divorce rates in 50 US states.
+
+- `Location` (character): Name of the state
+- `Marriage` (numeric): Marriage rate in state i
+- `MedianAgeMarriage` (numeric): Median age at marriage at first marriage (in years) in state i
+- `Divorce` (numeric): Divorce rate in state i
+
+1. Graphical exploration
+
+- Create a scatterplot for the divorce rate (`Divorce`) and the median age at marriage (`MedianAgeMarriage`)
+- Create a scatterplot for the divorce rate (`Divorce`) and the marriage rate (`Marriage`)
+
+What patterns of association are visible in the plots?
+
+```{r scatterplot-age-divorce, fig.cap="Scatterplot median age at marriage and divorce rates."}
+ggplot(data = marriage, aes(x = MedianAgeMarriage, y = Divorce)) + 
+  geom_point() +
+  labs(
+    y = "Divorce rate",
+    x = "Median age at marriage"
+  )
+```
+
+
+```{r marriage-divorce, fig.cap="Scatterplot: marriage rates and divorce rates."}
+ggplot(data = marriage, aes(x = Marriage, y = Divorce)) + 
+  geom_point() +
+  labs(
+    y = "Divorce rate",
+    x = "Marriage rate"
+  )
+```
+From the plots you can see a positive association between marriage rates and divorce rates. States with higher marriage rates also tend to have high divorce rates (see Figure \@ref(fig:scatterplot-age-divorce)).
+
+States that have a low median age at marriage tend to have higher divorce rates (Figure \@ref(fig:marriage-divorce)).
+
+
+2. Fit the following linear regression model (model 1) and interpret the estimated coefficients
+
+$$
+  \text{Divorce}_i = \alpha + \beta \text{MedianAgeMarriage}_i + e_i, e_i \sim N(0, \sigma^2)
+$$
+  
+```{r}
+Model1 <- lm(Divorce ~ MedianAgeMarriage, data = marriage)
+summary(Model1)
+```
+The intercept in the model ($\alpha$) corresponds to the expected divorce rate in a state with zero median age at marriage (not realistic).
+
+The slope in the model is the expected difference in divorce rates between states that differ by one year of median age at marriage. The estimated slope ($\hat{\beta} = -0.87$) is negative, indicating that the expected divorce rate is lower in states with higher median age at marriage.
+
+
+3. Fit the following linear regression model (model 2) and interpret the estimated coefficients
+
+$$
+  \text{Divorce}_i = \alpha + \beta \text{Marriage}_i + e_i, e_i \sim N(0, \sigma^2)
+$$
+
+```{r}
+Model2 <- lm(Divorce ~ Marriage, data = marriage)
+summary(Model2)
+```
+The intercept ($\alpha$) in this model is the expected divorce rate of a state with zero marriage rate (not realistic).
+The slope ($\beta$) in this model is the expected difference between the divorce rates of states that differ by one unit of marriage rate. The estimated slope ($\hat{\beta} = 0.17$), indicating that states with higher marriage rate also tend to have a high divorce rate.
+
+
+4. Fit the following linear regression model (model 3) and interpret the estimated coefficients and interpret the estimated coefficients.
+
+$$
+  \text{Divorce}_i = \alpha + \beta_1 \text{Marriage}_i +  \beta_2 \text{MedianAgeMarriage} + e_i, e_i \sim N(0, \sigma^2)
+$$
+  
+```{r}
+Model3 <- lm(Divorce ~ Marriage + MedianAgeMarriage, data = marriage)
+summary(Model3)
+```
+
+5. Explain the change of the coefficient for `Marriage` between model 2 and model 3.
+
+The estimated coefficient of `Marriage` in Model 2 is positive (0.17) and significant (you can reject the null hypothesis that the coefficient is zero: 2.792 >  2.01: the upper critical value at 5% sign. level and 50 - 2 = 48 degrees of freedom).
+
+In Model 3 the coefficient is even negative and not significant at the 5% sign. level (you cannot reject the null hypothesis that the coefficient is zero: -0.706 > -2.01).
+
+```{r}
+## Compute the critical values (the difference between the upper and the lower critical values is only the sign)
+
+## Critical values for model 2
+qt(0.025, df = 50 - 2)
+
+## Critical values for model 3
+qt(0.025, df = 50 - 3)
+```
+
+The meaning of the coefficient for `Marriage` is different in the two models. In Model 3 $\beta_1$ is the expected difference in divorce rates for one unit of `Marriage`, but _given_ a fixed age at marriage. The coefficient is close to zero (and not significant). This indicates that knowing the marriage rate of a state helps with predicting the divorce rate if you already know the median age at marriage.
+
+_Extra explanation_: The reason for the change of the coefficient between the two models is that median age at marriage is negatively associated with _both_ the divorce and the marriage rate (Figures \@ref(fig:scatterplot-age-divorce), \@ref(fig:scatterplot-age-marriage)). States with high median age at marriage tend to have both low marriage rates _and_ low divorce rates and the other way around: states with low marriage rates tend to have a high median age at marriage and therefore high divorce rates, see Figure \@ref(fig:scatter-marriage-divorce-age).
+
+```{r scatterplot-age-marriage, fig.cap="Scatterplot: median age at marriage and marriage rates."}
+marriage %>%
+  ggplot(aes(x = MedianAgeMarriage, y = Marriage)) +
+  geom_point() + 
+  labs(
+    title = "Association between marriage rate and age at marriage",
+    x = "Median age at marriage",
+    y = "Marriage rate"
+  )
+```
+
+
+```{r scatter-marriage-divorce-age, fig.cap="Association between marriage rate, divorce rate and age at marriage. Age at marriage is grouped into two classes (colours) for better visibility."}
+## Code for illustration purposes
+marriage %>%
+  ggplot(aes(x = Marriage, y = Divorce, colour = cut_interval(MedianAgeMarriage, n = 2))) +
+  geom_point() + 
+  labs(
+    title = "Association between marriage rate and age at marriage",
+    x = "Marriage rate",
+    y = "Median age at marriage",
+    colour = "Median age at marriage (two groups)"
+  )
+```
+
+6. Use model 3 to estimate the expected divorce rate for a state with `MedianAgeMarriage = 25` and `Marriage = 20.3`. Hint: use the `predict` function.
+
+```{r}
+predict(Model3, newdata = data.frame(MedianAgeMarriage=25, Marriage=20.3), se.Model3 = TRUE)
+```
+
+7. Create new variables `Marriage_centered` and `MedianAgeMarriage_centered` by subtracting the means of the respective variables.
+
+```{r}
+marriage <- marriage %>%
+  mutate(
+    Marriage_centered = Marriage - mean(Marriage),
+    MedianAgeMarriage_centered = MedianAgeMarriage - mean(MedianAgeMarriage)
+  )
+```
+
+
+8. Fit the following linear regression model (model 4) and interpret the estimated coefficients. Hint: the overline over a variable refers to the mean of this variable.
+
+$$
+  \text{Divorce}_i = \alpha + \beta_1 (\text{Marriage}_i - \overline{\text{Marriage}}) +  \beta_2 (\text{MedianAgeMarriage}_i - \overline{\text{MedianAgeMarriage}}) + e_i, e_i \sim N(0, \sigma^2)
+$$
+
+```{r}
+Model4 <- lm(Divorce ~ Marriage_centered +MedianAgeMarriage_centered, data = marriage)
+summary(Model4)
+```
+
+9. Explain the change in the estimated intercept in model 4 and in model 5.
+
+The intercept in Model 4 is the expected divorce rate for a state with an average marriage rate and an average median age at marriage (averaged over all 50 states).
+
+10. Test the hypothesis (against a two-sided alternative) that `Marriage` is not linearly related to `Divorce`  given the age at marriage. Formulate the hypothesis in terms of the model coefficients and decide whether to reject it at a 5% significance level (probability of wrongful rejection of a true null hypothesis).
+
+
+$$
+H_0: \beta_1 = 0\\
+H_1: \beta_1 \neq 0
+$$
+The formulation of the statements in terms of the model coefficients derives from the interpretation of the coefficients (see above).
+
+```{r}
+## COmpute the critival values (df = 50 states - 3 coefficients)
+qt(0.025, df = 50 - 3)
+```
+The value of the t-statistic (see the lm summary) lies between the two critical values $-0.056 \in (-2.01, 2.01)$. Therefore you cannot reject the null hypothesis at the 5% significance level.

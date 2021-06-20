@@ -25,9 +25,9 @@ Homework 2: [https://classroom.github.com/g/wRii0IHe](https://classroom.github.c
 
 ## Final homework
 
-Homework assignment link: [https://classroom.github.com/g/W-q2A5de](https://classroom.github.com/g/W-q2A5de), due June 30, 2021 
+Homework assignment link: [https://classroom.github.com/g/W-q2A5de](https://classroom.github.com/g/W-q2A5de), due June 30, 2021, 19:00
 
-When you register for the final homework your repository will be empty. Please register for the homework until Monday, June 21. After that I will upload your teams assignment into that repository.
+When you register for the final homework your repository will be empty. Please register for the homework until Monday, June 21. After that I will upload your team's assignment into that repository.
 
 
 ## Grading
